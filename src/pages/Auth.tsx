@@ -1,0 +1,178 @@
+import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Bus, Mail, Lock, UserPlus, LogIn } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
+const Auth = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, signUp, user, loading } = useAuth();
+
+  // Redirect if already authenticated
+  if (!loading && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    await signIn(email, password);
+    
+    setIsLoading(false);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    await signUp(email, password);
+    
+    setIsLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-hero p-4">
+      <div className="w-full max-w-md space-y-8 animate-fade-in">
+        {/* Logo/Header */}
+        <div className="text-center">
+          <div className="mx-auto h-16 w-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
+            <Bus className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-white">Sistema de Consulta</h1>
+          <p className="text-white/80 mt-2">Desempenho de Linhas de Ônibus</p>
+        </div>
+
+        {/* Auth Forms */}
+        <Card className="backdrop-blur-sm bg-white/95 shadow-elegant border-0 animate-scale-in">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Acesse sua conta</CardTitle>
+            <CardDescription>
+              Entre com suas credenciais para consultar o desempenho das linhas
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin" className="flex items-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Entrar
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Cadastrar
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Entrando...' : 'Entrar'}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        minLength={6}
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Mínimo de 6 caracteres</p>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Cadastrando...' : 'Criar Conta'}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-white/60 text-sm">
+          Sistema seguro com autenticação Supabase
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Auth;

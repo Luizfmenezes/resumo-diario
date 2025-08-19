@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      desempenho_linhas: {
+        Row: {
+          codigo_linha: string
+          created_at: string
+          data_referencia: string
+          icf_prog_ep: number | null
+          icf_prog_pm: number | null
+          icf_prog_pt: number | null
+          icf_real_ep: number | null
+          icf_real_pm: number | null
+          icf_real_pt: number | null
+          icv_tp_prog: number | null
+          icv_tp_real: number | null
+          icv_ts_prog: number | null
+          icv_ts_real: number | null
+          id: string
+          ipp_tp: number | null
+          ipp_ts: number | null
+          ocorrencias_sos: number | null
+          perdas_icv: number | null
+          updated_at: string
+        }
+        Insert: {
+          codigo_linha: string
+          created_at?: string
+          data_referencia: string
+          icf_prog_ep?: number | null
+          icf_prog_pm?: number | null
+          icf_prog_pt?: number | null
+          icf_real_ep?: number | null
+          icf_real_pm?: number | null
+          icf_real_pt?: number | null
+          icv_tp_prog?: number | null
+          icv_tp_real?: number | null
+          icv_ts_prog?: number | null
+          icv_ts_real?: number | null
+          id?: string
+          ipp_tp?: number | null
+          ipp_ts?: number | null
+          ocorrencias_sos?: number | null
+          perdas_icv?: number | null
+          updated_at?: string
+        }
+        Update: {
+          codigo_linha?: string
+          created_at?: string
+          data_referencia?: string
+          icf_prog_ep?: number | null
+          icf_prog_pm?: number | null
+          icf_prog_pt?: number | null
+          icf_real_ep?: number | null
+          icf_real_pm?: number | null
+          icf_real_pt?: number | null
+          icv_tp_prog?: number | null
+          icv_tp_real?: number | null
+          icv_ts_prog?: number | null
+          icv_ts_real?: number | null
+          id?: string
+          ipp_tp?: number | null
+          ipp_ts?: number | null
+          ocorrencias_sos?: number | null
+          perdas_icv?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
