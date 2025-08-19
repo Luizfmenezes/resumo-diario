@@ -126,31 +126,33 @@ const LineDetails = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm shadow-card border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 hover:bg-primary/10"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar ao Dashboard
-          </Button>
-          
-          <div className="flex items-center space-x-3">
-            <div className="h-8 w-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Bus className="h-4 w-4 text-white" />
-            </div>
-            <div className="text-right">
-              <h1 className="font-bold">Linha {lineCode}</h1>
-              <p className="text-xs text-muted-foreground">
-                {selectedDate && format(new Date(selectedDate), "dd/MM/yyyy")}
-              </p>
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2 hover:bg-primary/10 self-start"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar ao Dashboard
+            </Button>
+            
+            <div className="flex items-center space-x-3">
+              <div className="h-8 w-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                <Bus className="h-4 w-4 text-white" />
+              </div>
+              <div className="text-right">
+                <h1 className="font-bold">Linha {lineCode}</h1>
+                <p className="text-xs text-muted-foreground">
+                  {selectedDate && format(new Date(selectedDate), "dd/MM/yyyy")}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
         {error ? (
           <Card className="border-destructive/50 bg-destructive/5">
             <CardContent className="p-8 text-center">
@@ -179,7 +181,7 @@ const LineDetails = () => {
             </Card>
 
             {/* Performance Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* ICV Card */}
               <Card className="bg-gradient-card shadow-elegant">
                 <CardHeader>
@@ -193,11 +195,11 @@ const LineDetails = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-medium">ICV TP:</span>
                       <div className="text-right">
-                        <div className="flex items-center gap-2">
-                          <span>Prog {data.icv_tp_prog}, Real {data.icv_tp_real}</span>
+                        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-2">
+                          <span className="text-sm">Prog {data.icv_tp_prog}, Real {data.icv_tp_real}</span>
                           <Badge 
                             variant="outline" 
-                            className={`${getPerformanceColor(calculatePercentage(data.icv_tp_real, data.icv_tp_prog))} border-current`}
+                            className={`${getPerformanceColor(calculatePercentage(data.icv_tp_real, data.icv_tp_prog))} border-current text-xs`}
                           >
                             {getPerformanceIcon(calculatePercentage(data.icv_tp_real, data.icv_tp_prog))}
                             {calculatePercentage(data.icv_tp_real, data.icv_tp_prog)}%
@@ -209,11 +211,11 @@ const LineDetails = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-medium">ICV TS:</span>
                       <div className="text-right">
-                        <div className="flex items-center gap-2">
-                          <span>Prog {data.icv_ts_prog}, Real {data.icv_ts_real}</span>
+                        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-2">
+                          <span className="text-sm">Prog {data.icv_ts_prog}, Real {data.icv_ts_real}</span>
                           <Badge 
                             variant="outline" 
-                            className={`${getPerformanceColor(calculatePercentage(data.icv_ts_real, data.icv_ts_prog))} border-current`}
+                            className={`${getPerformanceColor(calculatePercentage(data.icv_ts_real, data.icv_ts_prog))} border-current text-xs`}
                           >
                             {getPerformanceIcon(calculatePercentage(data.icv_ts_real, data.icv_ts_prog))}
                             {calculatePercentage(data.icv_ts_real, data.icv_ts_prog)}%

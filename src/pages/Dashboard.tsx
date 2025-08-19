@@ -80,26 +80,58 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
-              🔄 Atualizar Linhas
-            </Button>
-          </div>
-          
-          {/* Admin Controls */}
-          {isAdmin && (
-            <div className="flex gap-3">
-              <LoadServiceModal onServiceLoaded={handleServiceLoaded} />
-              <LoadedDatesManager onDatesChanged={handleServiceLoaded} />
+      <main className="max-w-4xl mx-auto px-4 py-4 sm:py-8 space-y-6 sm:space-y-8">
+        {/* Controls Section */}
+        <div className="flex flex-col gap-4 mb-6">
+          {/* Date Selection */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full sm:w-[240px] justify-start text-left font-normal",
+                      "border-border bg-card hover:bg-accent"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground hover:bg-primary/10"
+                onClick={() => setRefreshKey(prev => prev + 1)}
+              >
+                🔄 Atualizar
+              </Button>
             </div>
-          )}
+            
+            {/* Admin Controls */}
+            {isAdmin && (
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <LoadServiceModal onServiceLoaded={handleServiceLoaded} />
+                <LoadedDatesManager onDatesChanged={handleServiceLoaded} />
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative max-w-md">
+          <div className="relative max-w-full sm:max-w-md">
             <input
               type="text"
               placeholder="Buscar linhas..."
@@ -109,11 +141,11 @@ const Dashboard = () => {
         </div>
 
         {/* Bus Lines Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {busLines.map((line, index) => (
             <Card
               key={line}
-              className="bg-secondary hover:bg-secondary/90 transition-all duration-200 cursor-pointer animate-scale-in border-0"
+              className="bg-secondary hover:bg-secondary/90 transition-all duration-200 cursor-pointer animate-scale-in border-0 touch-manipulation"
               style={{ animationDelay: `${index * 0.05}s` }}
               onClick={() => handleLineClick(line)}
             >
@@ -121,8 +153,8 @@ const Dashboard = () => {
                 <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                   <Bus className="h-5 w-5 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-white text-lg">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-white text-lg truncate">
                     Linha {line}
                   </h3>
                   <p className="text-white/80 text-sm">

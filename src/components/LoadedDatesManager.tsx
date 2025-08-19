@@ -100,7 +100,7 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
           Gerenciar Datas
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-xs sm:max-w-md max-h-[80vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Datas Carregadas</DialogTitle>
         </DialogHeader>
@@ -108,7 +108,7 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
           {loadedDates.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground text-sm">
                   Nenhuma data carregada ainda
                 </p>
               </CardContent>
@@ -117,12 +117,12 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
             loadedDates.map((dateInfo) => (
               <Card key={dateInfo.data_referencia} className="hover:shadow-md transition-all">
                 <CardContent className="pt-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">
                         {format(new Date(dateInfo.data_referencia), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       </p>
-                      <Badge variant="secondary" className="mt-1">
+                      <Badge variant="secondary" className="mt-1 text-xs">
                         {dateInfo.linha_count} linha{dateInfo.linha_count !== 1 ? 's' : ''}
                       </Badge>
                     </div>
@@ -131,7 +131,7 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
                       size="sm"
                       onClick={() => handleDeleteDate(dateInfo.data_referencia)}
                       disabled={isLoading}
-                      className="text-destructive hover:bg-destructive/10"
+                      className="text-destructive hover:bg-destructive/10 shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

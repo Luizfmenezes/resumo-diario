@@ -164,7 +164,7 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
           Carregar Serviço
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-xs sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Carregar Dados do Serviço</DialogTitle>
         </DialogHeader>
@@ -207,22 +207,23 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
               placeholder="Cole aqui o texto com os dados das linhas..."
               value={serviceText}
               onChange={(e) => setServiceText(e.target.value)}
-              className="min-h-[400px] font-mono text-sm"
+              className="min-h-[300px] sm:min-h-[400px] font-mono text-xs sm:text-sm"
             />
           </div>
           
-          <div className="flex gap-2 justify-end">
+          <div className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button 
               variant="outline" 
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
+              className="order-2 sm:order-1"
             >
               Cancelar
             </Button>
             <Button 
               onClick={handleLoadService}
               disabled={isLoading}
-              className="bg-gradient-primary hover:shadow-glow"
+              className="bg-gradient-primary hover:shadow-glow order-1 sm:order-2 flex-1"
             >
               {isLoading ? 'Carregando...' : 'Carregar Dados'}
             </Button>
