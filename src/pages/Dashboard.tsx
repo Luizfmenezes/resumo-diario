@@ -49,29 +49,29 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-card border-b animate-fade-in">
+      <header className="bg-card/80 backdrop-blur-sm shadow-card border-b border-border animate-fade-in">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-gradient-primary rounded-xl flex items-center justify-center">
-              <Bus className="h-5 w-5 text-white" />
+            <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
+              <Bus className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Sistema de Consulta</h1>
-              <p className="text-sm text-muted-foreground">Desempenho de Linhas de Ônibus</p>
+              <h1 className="text-xl font-bold text-foreground">Consulta de Linhas</h1>
+              <p className="text-sm text-muted-foreground">13 de Agosto de 2025</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm font-medium">{user?.username}</p>
-              <p className="text-xs text-muted-foreground">Usuário conectado</p>
+              <p className="text-sm font-medium text-foreground">{user?.username}</p>
+              <p className="text-xs text-muted-foreground">Quarta-Feira</p>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={signOut}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-border"
             >
               <LogOut className="h-4 w-4" />
               Sair
@@ -81,102 +81,63 @@ const Dashboard = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        {/* Admin Controls */}
-        {isAdmin && (
-          <div className="mb-6 flex flex-wrap gap-3 justify-center animate-fade-in">
-            <LoadServiceModal onServiceLoaded={handleServiceLoaded} />
-            <LoadedDatesManager onDatesChanged={handleServiceLoaded} />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
+              🔄 Atualizar Linhas
+            </Button>
           </div>
-        )}
+          
+          {/* Admin Controls */}
+          {isAdmin && (
+            <div className="flex gap-3">
+              <LoadServiceModal onServiceLoaded={handleServiceLoaded} />
+              <LoadedDatesManager onDatesChanged={handleServiceLoaded} />
+            </div>
+          )}
+        </div>
         
-        {/* Date Selection */}
-        <Card className="bg-gradient-card shadow-elegant animate-slide-up">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-primary" />
-              Selecione a Data para Consulta
-            </CardTitle>
-            <CardDescription>
-              Escolha a data para visualizar o desempenho das linhas de ônibus
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-80 justify-start text-left font-normal bg-white/50 hover:bg-white/80 transition-all",
-                    !selectedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? (
-                    format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
-          </CardContent>
-        </Card>
-
-        {/* Selected Date Display */}
-        <div className="text-center animate-fade-in">
-          <Badge variant="secondary" className="text-lg px-4 py-2 bg-primary/10 text-primary border-primary/20">
-            <Activity className="mr-2 h-4 w-4" />
-            Consulta para {format(selectedDate, "dd/MM/yyyy")}
-          </Badge>
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Buscar linhas..."
+              className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
         </div>
 
         {/* Bus Lines Grid */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6 text-center">Linhas Disponíveis</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {busLines.map((line, index) => (
-              <Card
-                key={line}
-                className="hover:shadow-glow transition-all duration-300 cursor-pointer group bg-gradient-card animate-scale-in hover:scale-105"
-                style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => handleLineClick(line)}
-              >
-                <CardContent className="p-6 text-center">
-                  <div className="h-12 w-12 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-glow transition-all">
-                    <Bus className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {busLines.map((line, index) => (
+            <Card
+              key={line}
+              className="bg-secondary hover:bg-secondary/90 transition-all duration-200 cursor-pointer animate-scale-in border-0"
+              style={{ animationDelay: `${index * 0.05}s` }}
+              onClick={() => handleLineClick(line)}
+            >
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
+                  <Bus className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white text-lg">
                     Linha {line}
                   </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Clique para visualizar o desempenho
+                  <p className="text-white/80 text-sm">
+                    Consultar resumo
                   </p>
-                  <div className="mt-4">
-                    <Badge variant="outline" className="group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      Ver Relatório
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Footer Info */}
-        <div className="text-center text-muted-foreground text-sm animate-fade-in">
+        <div className="text-center text-muted-foreground text-sm animate-fade-in mt-8">
           <p>
-            Sistema desenvolvido para consulta de desempenho operacional • 
-            Dados em tempo real do Supabase
+            Sistema desenvolvido para consulta de desempenho operacional
           </p>
         </div>
       </main>
