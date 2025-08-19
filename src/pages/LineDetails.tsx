@@ -42,7 +42,7 @@ const LineDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedDate = searchParams.get('data');
+  const selectedDate = searchParams.get('date');
 
   // Redirect if not authenticated
   if (!authLoading && !user) {

@@ -10,6 +10,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadServiceModal from '@/components/LoadServiceModal';
+import LoadedDatesManager from '@/components/LoadedDatesManager';
 
 const busLines = [
   '1017-10', '1020-10', '1024-10', '1025-10', 
@@ -18,6 +20,7 @@ const busLines = [
 
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [refreshKey, setRefreshKey] = useState(0);
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -28,8 +31,14 @@ const Dashboard = () => {
 
   const handleLineClick = (lineCode: string) => {
     const dateParam = format(selectedDate, 'yyyy-MM-dd');
-    navigate(`/linha/${lineCode}?data=${dateParam}`);
+    navigate(`/linha/${lineCode}?date=${dateParam}`);
   };
+
+  const handleServiceLoaded = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const isAdmin = user?.role === 'admin';
 
   if (loading) {
     return (
@@ -55,7 +64,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm font-medium">{user?.email}</p>
+              <p className="text-sm font-medium">{user?.username}</p>
               <p className="text-xs text-muted-foreground">Usuário conectado</p>
             </div>
             <Button
@@ -72,6 +81,14 @@ const Dashboard = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        {/* Admin Controls */}
+        {isAdmin && (
+          <div className="mb-6 flex flex-wrap gap-3 justify-center animate-fade-in">
+            <LoadServiceModal onServiceLoaded={handleServiceLoaded} />
+            <LoadedDatesManager onDatesChanged={handleServiceLoaded} />
+          </div>
+        )}
+        
         {/* Date Selection */}
         <Card className="bg-gradient-card shadow-elegant animate-slide-up">
           <CardHeader className="text-center">

@@ -80,12 +80,50 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          created_at: string
+          id: string
+          password: string
+          role: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password: string
+          role?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password?: string
+          role?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      authenticate_user: {
+        Args: { p_password: string; p_username: string }
+        Returns: {
+          id: string
+          role: string
+          username: string
+        }[]
+      }
+      set_current_user: {
+        Args: { p_username: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
