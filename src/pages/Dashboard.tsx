@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Bus, Calendar as CalendarIcon, LogOut, Activity } from 'lucide-react';
+import { Calendar as CalendarIcon, LogOut, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadServiceModal from '@/components/LoadServiceModal';
 import LoadedDatesManager from '@/components/LoadedDatesManager';
+import SpencerLogo from '@/components/SpencerLogo';
 
 const busLines = [
   '1017-10', '1020-10', '1024-10', '1025-10', 
@@ -23,6 +24,14 @@ const Dashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Auto-refresh when date changes
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setRefreshKey(prev => prev + 1);
+    }
+  };
 
   // Redirect if not authenticated
   if (!loading && !user) {
@@ -54,12 +63,12 @@ const Dashboard = () => {
       <header className="bg-card/80 backdrop-blur-sm shadow-card border-b border-border animate-fade-in">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
-              <Bus className="h-5 w-5 text-primary-foreground" />
+            <div className="h-12 w-12">
+              <SpencerLogo className="h-full w-full" size="sm" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Consulta de Linhas</h1>
-              <p className="text-sm text-muted-foreground">13 de Agosto de 2025</p>
+              <h1 className="text-xl font-bold text-foreground">Spencer Transportes</h1>
+              <p className="text-sm text-muted-foreground">Sistema de Consulta</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -103,20 +112,12 @@ const Dashboard = () => {
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
+                    onSelect={handleDateChange}
                     initialFocus
                     className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-muted-foreground hover:bg-primary/10"
-                onClick={() => setRefreshKey(prev => prev + 1)}
-              >
-                🔄 Atualizar
-              </Button>
             </div>
             
             {/* Admin Controls */}
@@ -150,8 +151,8 @@ const Dashboard = () => {
               onClick={() => handleLineClick(line)}
             >
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
-                  <Bus className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 shrink-0">
+                  <SpencerLogo className="h-full w-full" size="sm" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-white text-lg truncate">

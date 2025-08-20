@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Bus, User, Lock } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import SpencerLogo from '@/components/SpencerLogo';
 
 const Auth = () => {
   const [username, setUsername] = useState('');
@@ -40,18 +41,18 @@ const Auth = () => {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         {/* Logo/Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
-            <Bus className="h-8 w-8 text-white" />
+          <div className="mx-auto h-20 w-20 mb-4">
+            <SpencerLogo className="h-full w-full" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Sistema de Consulta</h1>
-          <p className="text-white/80 mt-2">Desempenho de Linhas de Ônibus</p>
+          <h1 className="text-3xl font-bold text-white">Spencer Transportes</h1>
+          <p className="text-white/80 mt-2">Sistema de Consulta de Desempenho</p>
         </div>
 
         {/* Auth Form */}
         <Card className="backdrop-blur-sm bg-white/95 shadow-elegant border-0 animate-scale-in">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Login do Sistema</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-foreground">Login Spencer Transportes</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
           </CardHeader>
@@ -92,7 +93,7 @@ const Auth = () => {
                 className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
                 disabled={isLoading}
               >
-                {isLoading ? 'Entrando...' : 'Entrar no Sistema'}
+                {isLoading ? 'Entrando...' : 'Acessar Spencer Transportes'}
               </Button>
             </form>
           </CardContent>

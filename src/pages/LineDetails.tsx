@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Bus, Calendar, TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, TrendingDown, Activity, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import SpencerLogo from '@/components/SpencerLogo';
 
 interface PerformanceData {
   id: string;
@@ -56,6 +57,13 @@ const LineDetails = () => {
       try {
         setLoading(true);
         setError(null);
+
+        // Ensure user context is set before query
+        const storedUser = localStorage.getItem('current_user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          await supabase.rpc('set_current_user', { p_username: userData.username });
+        }
 
         const { data: performanceData, error: fetchError } = await supabase
           .from('desempenho_linhas')
@@ -138,8 +146,8 @@ const LineDetails = () => {
             </Button>
             
             <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Bus className="h-4 w-4 text-white" />
+              <div className="h-10 w-10">
+                <SpencerLogo className="h-full w-full" size="sm" />
               </div>
               <div className="text-right">
                 <h1 className="font-bold">Linha {lineCode}</h1>
@@ -170,7 +178,9 @@ const LineDetails = () => {
             <Card className="bg-gradient-primary text-primary-foreground shadow-glow">
               <CardHeader className="text-center">
                 <CardTitle className="text-3xl flex items-center justify-center gap-3">
-                  <Bus className="h-8 w-8" />
+                  <div className="h-8 w-8">
+                    <SpencerLogo className="h-full w-full" size="sm" />
+                  </div>
                   🚍 LINHA: {data.codigo_linha}
                 </CardTitle>
                 <div className="flex items-center justify-center gap-2 text-primary-foreground/80">
