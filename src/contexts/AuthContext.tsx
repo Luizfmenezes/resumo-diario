@@ -23,20 +23,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for existing user in localStorage
-    const storedUser = localStorage.getItem('current_user');
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-        // Set user context in database (non-blocking)
-        supabase.rpc('set_current_user', { p_username: userData.username });
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('current_user');
+    const initializeUser = async () => {
+      // Check for existing user in localStorage
+      const storedUser = localStorage.getItem('current_user');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          // Set user context in database (await to ensure it's set)
+          await supabase.rpc('set_current_user', { p_username: userData.username });
+        } catch (error) {
+          console.error('Error parsing stored user or setting context:', error);
+          localStorage.removeItem('current_user');
+          setUser(null);
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initializeUser();
   }, []);
 
   const signIn = async (username: string, password: string) => {

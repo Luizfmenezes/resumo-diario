@@ -108,6 +108,13 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
     setIsLoading(true);
     
     try {
+      // Ensure user context is set before operations
+      const storedUser = localStorage.getItem('current_user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        await supabase.rpc('set_current_user', { p_username: userData.username });
+      }
+
       const services = parseServiceText(serviceText);
       
       if (services.length === 0) {
