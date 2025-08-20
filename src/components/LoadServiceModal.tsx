@@ -40,38 +40,38 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
           codigo_linha: match ? match[1].trim() : '',
           data_referencia: format(selectedDate, 'yyyy-MM-dd')
         };
-      } else if (trimmedLine.includes('ICV TP:')) {
+      } else if (trimmedLine.includes('- ICV TP:')) {
         const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
         if (match) {
           currentService.icv_tp_prog = parseInt(match[1]);
           currentService.icv_tp_real = parseInt(match[2]);
         }
-      } else if (trimmedLine.includes('ICV TS:')) {
+      } else if (trimmedLine.includes('- ICV TS:')) {
         const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
         if (match) {
           currentService.icv_ts_prog = parseInt(match[1]);
           currentService.icv_ts_real = parseInt(match[2]);
         }
-      } else if (trimmedLine.includes('Perdas ICV:')) {
+      } else if (trimmedLine.includes('- Perdas ICV:')) {
         const match = trimmedLine.match(/Perdas ICV:\s*(\d+)/);
         if (match) {
           currentService.perdas_icv = parseInt(match[1]);
         }
-      } else if (trimmedLine.includes('ICF Prog:')) {
+      } else if (trimmedLine.includes('- ICF Prog:')) {
         const match = trimmedLine.match(/PM\((\d+)\),\s*EP\((\d+)\),\s*PT\((\d+)\)/);
         if (match) {
           currentService.icf_prog_pm = parseInt(match[1]);
           currentService.icf_prog_ep = parseInt(match[2]);
           currentService.icf_prog_pt = parseInt(match[3]);
         }
-      } else if (trimmedLine.includes('ICF Real:')) {
+      } else if (trimmedLine.includes('- ICF Real:')) {
         const match = trimmedLine.match(/PM\((\d+)\),\s*EP\((\d+)\),\s*PT\((\d+)\)/);
         if (match) {
           currentService.icf_real_pm = parseInt(match[1]);
           currentService.icf_real_ep = parseInt(match[2]);
           currentService.icf_real_pt = parseInt(match[3]);
         }
-      } else if (trimmedLine.includes('IPP:')) {
+      } else if (trimmedLine.includes('- IPP:')) {
         const tpMatch = trimmedLine.match(/TP\s*\((\d+)%\)/);
         const tsMatch = trimmedLine.match(/TS\s*\((\d+)%\)/);
         if (tpMatch) {
@@ -80,7 +80,7 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
         if (tsMatch) {
           currentService.ipp_ts = parseInt(tsMatch[1]);
         }
-      } else if (trimmedLine.includes('S.O.S:')) {
+      } else if (trimmedLine.includes('- S.O.S:')) {
         const match = trimmedLine.match(/S\.O\.S:\s*(\d+)/);
         if (match) {
           currentService.ocorrencias_sos = parseInt(match[1]);

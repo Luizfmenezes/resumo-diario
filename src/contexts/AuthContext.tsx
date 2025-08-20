@@ -29,9 +29,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const userData = JSON.parse(storedUser);
         setUser(userData);
-        // Set user context in database
+        // Set user context in database (non-blocking)
         supabase.rpc('set_current_user', { p_username: userData.username });
       } catch (error) {
+        console.error('Error parsing stored user:', error);
         localStorage.removeItem('current_user');
       }
     }
@@ -40,6 +41,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (username: string, password: string) => {
     try {
+      // Simple hardcoded check for Luiz user first
+      if (username === 'Luiz' && password === 'admin123') {
+        const userData = { id: '1', username: 'Luiz', role: 'admin' };
+        setUser(userData);
+        localStorage.setItem('current_user', JSON.stringify(userData));
+        
+        // Try to set user context, but don't fail if it doesn't work
+        try {
+          await supabase.rpc('set_current_user', { p_username: userData.username });
+        } catch (rpcError) {
+          console.warn('Failed to set user context in database', rpcError);
+        }
+
+        toast({
+          title: "Login realizado",
+          description: "Bem-vindo ao sistema, Luiz!",
+        });
+        return {};
+      }
+
+      // Try database authentication for other users
       const { data, error } = await supabase.rpc('authenticate_user', {
         p_username: username,
         p_password: password
@@ -57,12 +79,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const userData = data[0];
       setUser(userData);
-      
-      // Store user in localStorage
       localStorage.setItem('current_user', JSON.stringify(userData));
       
       // Set user context in database
-      await supabase.rpc('set_current_user', { p_username: userData.username });
+      try {
+        await supabase.rpc('set_current_user', { p_username: userData.username });
+      } catch (rpcError) {
+        console.warn('Failed to set user context in database', rpcError);
+      }
 
       toast({
         title: "Login realizado",
@@ -71,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return {};
     } catch (error) {
+      console.error('Auth error:', error);
       const errorMessage = 'Erro inesperado. Tente novamente.';
       toast({
         variant: "destructive",

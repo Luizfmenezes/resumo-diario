@@ -15,7 +15,7 @@ import LoadedDatesManager from '@/components/LoadedDatesManager';
 
 const busLines = [
   '1017-10', '1020-10', '1024-10', '1025-10', 
-  '1026-10', '8015-10', '8016-10', '9784-10', 'N137-11'
+  '1026-10', '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'
 ];
 
 const Dashboard = () => {
