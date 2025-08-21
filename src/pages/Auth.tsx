@@ -51,15 +51,16 @@ const Auth = () => {
         {/* Auth Form */}
         <Card className="backdrop-blur-sm bg-white/95 shadow-elegant border-0 animate-scale-in">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-foreground">Login Spencer Transportes</CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardTitle className="text-2xl text-zinc-900">Login Spencer Transportes</CardTitle>
+            <CardDescription className="text-zinc-700">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignIn} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="username">Usuário</Label>
+                {/* CORRIGIDO */}
+                <Label htmlFor="username" className="text-zinc-900">Usuário</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -74,7 +75,8 @@ const Auth = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                {/* CORRIGIDO */}
+                <Label htmlFor="password" className="text-zinc-900">Senha</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
