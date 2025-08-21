@@ -1,24 +1,22 @@
-import React from 'react';
+// src/components/SpencerLogo.tsx
 
+import React from 'react';
+// 1. Importamos a imagem do seu logo a partir da pasta assets
+import logoImage from '@/assets/spencer-logo.png';
+
+// Definimos os tipos das props para o componente (opcional, mas bom para TypeScript)
 interface SpencerLogoProps {
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
-const SpencerLogo: React.FC<SpencerLogoProps> = ({ className = '', size = 'md' }) => {
-  const sizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base'
-  };
-
+const SpencerLogo: React.FC<SpencerLogoProps> = ({ className }) => {
+  // 2. Em vez das divs, retornamos uma tag <img>
   return (
-    <div className={`flex items-center justify-center bg-gradient-primary rounded-lg ${className}`}>
-      <div className={`font-bold text-white text-center leading-tight ${sizeClasses[size]}`}>
-        <div>SPENCER</div>
-        <div className="text-[0.6em] tracking-wider">TRANSPORTES</div>
-      </div>
-    </div>
+    <img
+      src={logoImage} // A imagem importada é usada aqui
+      alt="Logo da Spencer Transportes" // Texto alternativo para acessibilidade
+      className={className} // Passamos a className para poder controlar o estilo (tamanho, etc.) de fora
+    />
   );
 };
 

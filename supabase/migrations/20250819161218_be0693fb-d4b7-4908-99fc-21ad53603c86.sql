@@ -17,9 +17,6 @@ ON public.users
 FOR SELECT 
 USING (username = current_setting('app.current_username', true));
 
--- Insert user Luiz with password 123
-INSERT INTO public.users (username, password, role) 
-VALUES ('Luiz', '123', 'admin');
 
 -- Update RLS policies for desempenho_linhas to work with custom auth
 DROP POLICY IF EXISTS "Authenticated users can view performance data" ON public.desempenho_linhas;

@@ -102,7 +102,7 @@ const Auth = () => {
         </Card>
 
         <p className="text-center text-white/60 text-sm">
-          Sistema seguro com autenticação Supabase
+          Sistema desenvolvido por Luiz Felipe
         </p>
       </div>
     </div>
