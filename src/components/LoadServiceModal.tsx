@@ -19,7 +19,8 @@ interface LoadServiceModalProps {
 const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [serviceText, setServiceText] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const now = new Date();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -36,9 +37,12 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
           services.push(currentService);
         }
         const match = trimmedLine.match(/LINHA:\s*(.+?)\s*---/);
+        const year = selectedDate.getFullYear();
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const day = String(selectedDate.getDate()).padStart(2, '0');
         currentService = {
           codigo_linha: match ? match[1].trim() : '',
-          data_referencia: format(selectedDate, 'yyyy-MM-dd')
+          data_referencia: `${year}-${month}-${day}`
         };
       } else if (trimmedLine.includes('- ICV TP:')) {
         const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
@@ -127,10 +131,15 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
       }
 
       // Delete existing data for this date first
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+      
       await supabase
         .from('desempenho_linhas')
         .delete()
-        .eq('data_referencia', format(selectedDate, 'yyyy-MM-dd'));
+        .eq('data_referencia', dateString);
 
       // Insert new data
       const { error } = await supabase
@@ -199,7 +208,13 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
+                  onSelect={(date) => {
+                    if (date) {
+                      // Ensure we work with local date, no timezone conversion
+                      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                      setSelectedDate(localDate);
+                    }
+                  }}
                   initialFocus
                   className="p-3 pointer-events-auto"
                 />

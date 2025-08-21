@@ -20,7 +20,8 @@ const busLines = [
 ];
 
 const Dashboard = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const now = new Date();
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
   const [refreshKey, setRefreshKey] = useState(0);
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +29,9 @@ const Dashboard = () => {
   // Auto-refresh when date changes
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setSelectedDate(date);
+      // Ensure we work with local date, no timezone conversion
+      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      setSelectedDate(localDate);
       setRefreshKey(prev => prev + 1);
     }
   };
@@ -39,7 +42,11 @@ const Dashboard = () => {
   }
 
   const handleLineClick = (lineCode: string) => {
-    const dateParam = format(selectedDate, 'yyyy-MM-dd');
+    // Format date without timezone conversion
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    const dateParam = `${year}-${month}-${day}`;
     navigate(`/linha/${lineCode}?date=${dateParam}`);
   };
 
@@ -74,7 +81,7 @@ const Dashboard = () => {
           <div className="flex items-center space-x-3">
             <div className="text-right">
               <p className="text-sm font-medium text-foreground">{user?.username}</p>
-              <p className="text-xs text-muted-foreground">Quarta-Feira</p>
+              <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>
             <Button
               variant="outline"

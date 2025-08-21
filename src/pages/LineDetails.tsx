@@ -81,7 +81,11 @@ const LineDetails = () => {
           toast({
             variant: "destructive",
             title: "Dados não encontrados",
-            description: `Não há dados para a linha ${lineCode} em ${format(new Date(selectedDate), "dd/MM/yyyy")}.`,
+            description: `Não há dados para a linha ${lineCode} em ${(() => {
+              const [year, month, day] = selectedDate.split('-');
+              const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+              return format(date, "dd/MM/yyyy");
+            })()}.`,
           });
         } else {
           setData(performanceData);
@@ -152,7 +156,11 @@ const LineDetails = () => {
               <div className="text-right">
                 <h1 className="font-bold">Linha {lineCode}</h1>
                 <p className="text-xs text-muted-foreground">
-                  {selectedDate && format(new Date(selectedDate), "dd/MM/yyyy")}
+                  {selectedDate && (() => {
+                    const [year, month, day] = selectedDate.split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    return format(date, "dd/MM/yyyy");
+                  })()}
                 </p>
               </div>
             </div>
@@ -185,7 +193,11 @@ const LineDetails = () => {
                 </CardTitle>
                 <div className="flex items-center justify-center gap-2 text-primary-foreground/80">
                   <Calendar className="h-4 w-4" />
-                  {selectedDate && format(new Date(selectedDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  {selectedDate && (() => {
+                    const [year, month, day] = selectedDate.split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                    return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+                  })()}
                 </div>
               </CardHeader>
             </Card>
