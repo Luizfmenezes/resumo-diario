@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, LogOut, Activity, Bus } from 'lucide-react';
+import { Calendar as CalendarIcon, LogOut, Bus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -23,26 +22,27 @@ const Dashboard = () => {
   const now = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
   const [refreshKey, setRefreshKey] = useState(0);
-  const { user, signOut, loading } = useAuth();
+  
+  // --- CORREÇÃO 1: Buscando 'profile' do useAuth ---
+  const { user, profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Auto-refresh when date changes
+  // Adicionando um log para depuração final
+  console.log("Dashboard está renderizando com o perfil:", profile);
+
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      // Ensure we work with local date, no timezone conversion
       const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       setSelectedDate(localDate);
       setRefreshKey(prev => prev + 1);
     }
   };
 
-  // Redirect if not authenticated
   if (!loading && !user) {
     return <Navigate to="/auth" replace />;
   }
 
   const handleLineClick = (lineCode: string) => {
-    // Format date without timezone conversion
     const year = selectedDate.getFullYear();
     const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
     const day = String(selectedDate.getDate()).padStart(2, '0');
@@ -54,9 +54,10 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  const isAdmin = user?.role === 'admin';
+  // --- CORREÇÃO 2: Usando 'profile.role' em vez de 'user.role' ---
+  const isAdmin = profile?.role === 'admin';
 
-  if (loading) {
+  if (loading || !profile) { // Adicionamos '!profile' para esperar os dados do perfil carregarem
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -84,7 +85,8 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-foreground">{user?.username}</p>
+              {/* --- CORREÇÃO 3: Usando 'profile.username' em vez de 'user.username' --- */}
+              <p className="text-sm font-medium text-foreground">{profile?.username}</p>
               <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>
             <Button
@@ -103,7 +105,6 @@ const Dashboard = () => {
       <main className="max-w-4xl mx-auto px-4 py-4 sm:py-8 space-y-6 sm:space-y-8">
         {/* Controls Section */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* Date Selection */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Popover>
@@ -131,7 +132,6 @@ const Dashboard = () => {
               </Popover>
             </div>
             
-            {/* Admin Controls */}
             {isAdmin && (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <LoadServiceModal onServiceLoaded={handleServiceLoaded} />

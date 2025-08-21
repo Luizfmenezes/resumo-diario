@@ -80,6 +80,24 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          role: string | null
+          username: string
+        }
+        Insert: {
+          id: string
+          role?: string | null
+          username: string
+        }
+        Update: {
+          id?: string
+          role?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string
@@ -119,6 +137,18 @@ export type Database = {
           role: string
           username: string
         }[]
+      }
+      create_user: {
+        Args: { p_password: string; p_role?: string; p_username: string }
+        Returns: string
+      }
+      get_user_email_by_username: {
+        Args: { p_username: string }
+        Returns: string
+      }
+      hash_user_password: {
+        Args: { p_new_password: string; p_username: string }
+        Returns: boolean
       }
       set_current_user: {
         Args: { p_username: string }
