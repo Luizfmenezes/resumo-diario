@@ -23,12 +23,9 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
   const [refreshKey, setRefreshKey] = useState(0);
   
-  // --- CORREÇÃO 1: Buscando 'profile' do useAuth ---
-  const { user, profile, signOut, loading } = useAuth();
+  // Buscamos 'profile' e 'loading' do useAuth
+  const { profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
-
-  // Adicionando um log para depuração final
-  console.log("Dashboard está renderizando com o perfil:", profile);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -37,10 +34,6 @@ const Dashboard = () => {
       setRefreshKey(prev => prev + 1);
     }
   };
-
-  if (!loading && !user) {
-    return <Navigate to="/auth" replace />;
-  }
 
   const handleLineClick = (lineCode: string) => {
     const year = selectedDate.getFullYear();
@@ -54,13 +47,15 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  // --- CORREÇÃO 2: Usando 'profile.role' em vez de 'user.role' ---
+  // Usamos 'profile.role' para verificar se o usuário é admin
   const isAdmin = profile?.role === 'admin';
 
-  if (loading || !profile) { // Adicionamos '!profile' para esperar os dados do perfil carregarem
+  // O ProtectedRoute já lida com o 'loading' inicial.
+  // Esta verificação adicional garante que a página não renderize sem os dados do perfil.
+  if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground">Carregando dados do perfil...</p>
       </div>
     );
   }
@@ -85,8 +80,8 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              {/* --- CORREÇÃO 3: Usando 'profile.username' em vez de 'user.username' --- */}
-              <p className="text-sm font-medium text-foreground">{profile?.username}</p>
+              {/* Usamos 'profile.username' para exibir o nome */}
+              <p className="text-sm font-medium text-foreground">{profile.username}</p>
               <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>
             <Button

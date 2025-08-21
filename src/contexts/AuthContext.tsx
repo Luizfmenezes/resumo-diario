@@ -3,13 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Session, User } from '@supabase/supabase-js';
 
-// Interface para o nosso perfil de usuário
+// Interface para o nosso perfil de usuário, baseado na tabela 'profiles'
 interface Profile {
   username: string;
   role: string;
 }
 
-// Interface para os dados do contexto de autenticação
+// Interface para os dados que o contexto de autenticação irá fornecer
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -29,10 +29,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
+    setLoading(true);
+
     // Função segura para buscar o perfil do usuário
     const fetchUserProfile = async (user: User) => {
-      console.log("Buscando perfil para o usuário com ID:", user.id);
-
       try {
         const { data: userProfile, error } = await supabase
           .from('profiles')
@@ -40,65 +40,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('id', user.id)
           .single();
 
-        console.log("Resultado da busca de perfil (data):", userProfile);
-        console.log("Resultado da busca de perfil (error):", error);
-
         if (error) {
-          console.error("Erro na busca de perfil (RLS ou dado não encontrado):", error.message);
+          console.error("Perfil não encontrado ou erro na busca:", error.message);
           setProfile(null);
-          return null;
+          return;
         }
-        
-        if (!userProfile) {
-            console.log("PERFIL NÃO ENCONTRADO! Verifique se o ID do usuário existe na tabela 'profiles' e se os dados correspondem.");
-        }
-
-        return userProfile;
+        setProfile(userProfile);
       } catch (e) {
         console.error("Erro inesperado ao buscar perfil:", e);
-        return null;
+        setProfile(null);
       }
     };
 
-    // Lógica de inicialização da sessão
-    const initializeSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        if (session?.user) {
-          setUser(session.user);
-          const userProfile = await fetchUserProfile(session.user);
-          setProfile(userProfile);
-        }
-      } catch (error) {
-        console.error("Erro ao inicializar sessão:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeSession();
-
-    // Listener para mudanças de autenticação (login/logout)
+    // O listener onAuthStateChange lida com o carregamento inicial e com as mudanças de login/logout.
+    // É a forma mais robusta de gerenciar a sessão.
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
-      
+
       if (currentUser) {
-        const userProfile = await fetchUserProfile(currentUser);
-        setProfile(userProfile);
+        // Se um usuário está logado (seja por login ou refresh), buscamos seu perfil.
+        await fetchUserProfile(currentUser);
       } else {
+        // Se não há sessão, limpamos o perfil.
         setProfile(null);
       }
       
-      if (loading) setLoading(false);
+      // O carregamento só termina DEPOIS que a sessão e o perfil foram verificados.
+      setLoading(false);
     });
 
     return () => {
       authListener?.subscription?.unsubscribe();
     };
-  }, []);
+  }, []); // O array vazio [] garante que este efeito rode apenas uma vez.
 
   const signIn = async (username: string, password: string) => {
     const { data: email, error: rpcError } = await supabase.rpc('get_user_email_by_username', { 
@@ -132,10 +108,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     loading,
   };
-
-  // --- DEBUG LOG FINAL ---
-  // Este log nos mostra o valor do 'profile' toda vez que o AuthProvider renderiza.
-  console.log("AuthProvider is rendering with profile:", profile);
 
   return (
     <AuthContext.Provider value={value}>
