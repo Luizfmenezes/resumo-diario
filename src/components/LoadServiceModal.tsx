@@ -112,13 +112,10 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
     setIsLoading(true);
     
     try {
-      // Ensure user context is set before operations
-      const storedUser = localStorage.getItem('current_user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        await supabase.rpc('set_current_user', { p_username: userData.username });
-      }
-
+      // --- CORREÇÃO ---
+      // Lógica antiga de 'set_current_user' e 'localStorage' removida.
+      // O Supabase agora sabe quem é o utilizador através da sessão segura.
+      
       const services = parseServiceText(serviceText);
       
       if (services.length === 0) {
@@ -127,27 +124,30 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
           title: "Erro",
           description: "Não foi possível processar o texto fornecido",
         });
+        setIsLoading(false); // Adicionado para parar o loading em caso de erro de parsing
         return;
       }
 
-      // Delete existing data for this date first
+      // Apaga os dados existentes para esta data primeiro
       const year = selectedDate.getFullYear();
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const day = String(selectedDate.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
       
-      await supabase
+      const { error: deleteError } = await supabase
         .from('desempenho_linhas')
         .delete()
         .eq('data_referencia', dateString);
 
-      // Insert new data
-      const { error } = await supabase
+      if (deleteError) throw deleteError; // Lança o erro se a exclusão falhar
+
+      // Insere os novos dados
+      const { error: insertError } = await supabase
         .from('desempenho_linhas')
         .insert(services);
 
-      if (error) {
-        throw error;
+      if (insertError) {
+        throw insertError; // Lança o erro se a inserção falhar
       }
 
       toast({
@@ -161,8 +161,8 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: error.message || "Erro ao carregar serviço",
+        title: "Erro ao carregar serviço",
+        description: error.message || "Verifique as permissões da sua tabela (RLS).",
       });
     } finally {
       setIsLoading(false);
@@ -210,7 +210,7 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
                   selected={selectedDate}
                   onSelect={(date) => {
                     if (date) {
-                      // Ensure we work with local date, no timezone conversion
+                      // Garante que trabalhamos com a data local, sem conversão de fuso horário
                       const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                       setSelectedDate(localDate);
                     }
