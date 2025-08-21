@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, LogOut, Activity } from 'lucide-react';
+import { Calendar as CalendarIcon, LogOut, Activity, Bus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadServiceModal from '@/components/LoadServiceModal';
 import LoadedDatesManager from '@/components/LoadedDatesManager';
-import SpencerLogo from '@/components/SpencerLogo';
+import spencerLogoImage from '@/assets/spencer-logo.png';
 
 const busLines = [
   '1017-10', '1020-10', '1024-10', '1025-10', 
@@ -71,7 +71,11 @@ const Dashboard = () => {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="h-12 w-12">
-              <SpencerLogo className="h-full w-full" size="sm" />
+              <img 
+                src={spencerLogoImage} 
+                alt="Spencer Transportes" 
+                className="h-full w-full object-contain"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Spencer Transportes</h1>
@@ -158,8 +162,8 @@ const Dashboard = () => {
               onClick={() => handleLineClick(line)}
             >
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 shrink-0">
-                  <SpencerLogo className="h-full w-full" size="sm" />
+                <div className="h-10 w-10 shrink-0 flex items-center justify-center bg-white/20 rounded-lg">
+                  <Bus className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-white text-lg truncate">
