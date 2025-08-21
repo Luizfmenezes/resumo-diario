@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,17 @@ const Dashboard = () => {
   // Buscamos 'profile' e 'loading' do useAuth
   const { profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
+
+  // --- MODO DE DEPURAÇÃO ---
+  console.log('--- Renderização do Dashboard ---');
+  console.log('Auth loading:', loading);
+  console.log('Estado do Profile:', profile);
+
+  // Este useEffect irá disparar sempre que o objeto 'profile' mudar.
+  useEffect(() => {
+    console.log('EFFECT: O estado do Profile mudou para:', profile);
+  }, [profile]);
+  // --- FIM DO MODO DE DEPURAÇÃO ---
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -55,7 +66,7 @@ const Dashboard = () => {
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Carregando dados do perfil...</p>
+        <p className="text-muted-foreground">A carregar dados do perfil...</p>
       </div>
     );
   }

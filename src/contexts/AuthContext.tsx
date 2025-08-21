@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Session, User } from '@supabase/supabase-js';
 
-// Interface para o nosso perfil de usuário, baseado na tabela 'profiles'
+// Interface para o nosso perfil de utilizador, baseado na tabela 'profiles'
 interface Profile {
   username: string;
   role: string;
@@ -29,9 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    setLoading(true);
-
-    // Função segura para buscar o perfil do usuário
+    // Função segura para buscar o perfil do utilizador
     const fetchUserProfile = async (user: User) => {
       try {
         const { data: userProfile, error } = await supabase
@@ -42,10 +40,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (error) {
           console.error("Perfil não encontrado ou erro na busca:", error.message);
-          setProfile(null);
-          return;
+          setProfile(null); // Limpa o perfil em caso de erro
+        } else {
+          setProfile(userProfile);
         }
-        setProfile(userProfile);
       } catch (e) {
         console.error("Erro inesperado ao buscar perfil:", e);
         setProfile(null);
@@ -53,14 +51,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // O listener onAuthStateChange lida com o carregamento inicial e com as mudanças de login/logout.
-    // É a forma mais robusta de gerenciar a sessão.
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
+    // É a forma mais robusta de gerir a sessão.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user ?? null;
+      setSession(session);
       setUser(currentUser);
 
       if (currentUser) {
-        // Se um usuário está logado (seja por login ou refresh), buscamos seu perfil.
+        // Se um utilizador está logado (seja por login ou refresh), buscamos o seu perfil.
         await fetchUserProfile(currentUser);
       } else {
         // Se não há sessão, limpamos o perfil.
@@ -71,8 +69,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
+    // Função de limpeza para remover o listener quando o componente for desmontado
     return () => {
-      authListener?.subscription?.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []); // O array vazio [] garante que este efeito rode apenas uma vez.
 
@@ -82,14 +81,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (rpcError || !email) {
-      toast({ variant: "destructive", title: "Erro no Login", description: "Usuário ou senha inválidos." });
+      toast({ variant: "destructive", title: "Erro no Login", description: "Utilizador ou senha inválidos." });
       return;
     }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      toast({ variant: "destructive", title: "Erro no Login", description: "Usuário ou senha inválidos." });
+      toast({ variant: "destructive", title: "Erro no Login", description: "Utilizador ou senha inválidos." });
     } else {
       toast({ title: "Login realizado", description: "Bem-vindo de volta!" });
     }
@@ -111,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

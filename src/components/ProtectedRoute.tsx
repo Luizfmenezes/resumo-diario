@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -8,8 +8,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
-  const location = useLocation();
 
+  // 1. Enquanto o AuthContext está a verificar a sessão (loading === true),
+  // exibimos uma tela de carregamento central. Isto é crucial para
+  // evitar o redirecionamento prematuro ao recarregar a página.
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -18,11 +20,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // 2. Apenas depois de o carregamento terminar (loading === false),
+  // verificamos se há um utilizador. Se não houver, redirecionamos para a página de login.
   if (!user) {
-    // Redirect them to the auth page with a return url
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/auth" replace />;
   }
 
+  // 3. Se o carregamento terminou e há um utilizador, renderizamos o componente filho
+  // (o Dashboard ou LineDetails). O próprio Dashboard irá então verificar se o 'profile'
+  // já chegou antes de exibir os dados.
   return <>{children}</>;
 };
 
