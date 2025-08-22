@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,25 +18,21 @@ const busLines = [
   '1026-10', '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'
 ];
 
+// --- CORREÇÃO: Função para obter a data de ontem ---
+const getYesterday = () => {
+  const today = new Date();
+  today.setDate(today.getDate() - 1);
+  // Remove a parte do tempo para evitar problemas de fuso horário
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+};
+
 const Dashboard = () => {
-  const now = new Date();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+  // --- CORREÇÃO: Define o estado inicial com a data de ontem ---
+  const [selectedDate, setSelectedDate] = useState<Date>(getYesterday());
   const [refreshKey, setRefreshKey] = useState(0);
   
-  // Buscamos 'profile' e 'loading' do useAuth
   const { profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
-
-  // --- MODO DE DEPURAÇÃO ---
-  console.log('--- Renderização do Dashboard ---');
-  console.log('Auth loading:', loading);
-  console.log('Estado do Profile:', profile);
-
-  // Este useEffect irá disparar sempre que o objeto 'profile' mudar.
-  useEffect(() => {
-    console.log('EFFECT: O estado do Profile mudou para:', profile);
-  }, [profile]);
-  // --- FIM DO MODO DE DEPURAÇÃO ---
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -58,15 +54,13 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  // Usamos 'profile.role' para verificar se o usuário é admin
   const isAdmin = profile?.role === 'admin';
 
-  // O ProtectedRoute já lida com o 'loading' inicial.
-  // Esta verificação adicional garante que a página não renderize sem os dados do perfil.
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">A carregar dados do perfil...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground ml-4">A carregar dados do perfil...</p>
       </div>
     );
   }
@@ -91,7 +85,6 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              {/* Usamos 'profile.username' para exibir o nome */}
               <p className="text-sm font-medium text-foreground">{profile.username}</p>
               <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>

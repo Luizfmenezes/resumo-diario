@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (error) {
           console.error("Perfil não encontrado ou erro na busca:", error.message);
-          setProfile(null); // Limpa o perfil em caso de erro
+          setProfile(null);
         } else {
           setProfile(userProfile);
         }
@@ -50,23 +50,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // O listener onAuthStateChange lida com o carregamento inicial e com as mudanças de login/logout.
-    // É a forma mais robusta de gerir a sessão.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setSession(session);
-      setUser(currentUser);
+    // 1. Verificação da sessão inicial ao carregar a página
+    const initializeSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        if (session?.user) {
+          setUser(session.user);
+          await fetchUserProfile(session.user);
+        }
+      } catch (error) {
+        console.error("Erro ao inicializar sessão:", error);
+      } finally {
+        // ESSENCIAL: Garante que o loading termine, mesmo se houver erro
+        setLoading(false);
+      }
+    };
 
+    initializeSession();
+
+    // 2. Listener para mudanças de autenticação (login/logout em outra aba, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       if (currentUser) {
-        // Se um utilizador está logado (seja por login ou refresh), buscamos o seu perfil.
         await fetchUserProfile(currentUser);
       } else {
-        // Se não há sessão, limpamos o perfil.
         setProfile(null);
       }
-      
-      // O carregamento só termina DEPOIS que a sessão e o perfil foram verificados.
-      setLoading(false);
     });
 
     // Função de limpeza para remover o listener quando o componente for desmontado

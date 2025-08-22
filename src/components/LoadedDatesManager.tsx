@@ -33,7 +33,7 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
 
       if (error) throw error;
 
-      // Group by date and count lines
+      // Agrupa por data e conta as linhas
       const dateMap = new Map<string, number>();
       data?.forEach((item) => {
         const date = item.data_referencia;
@@ -44,6 +44,9 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
         data_referencia: date,
         linha_count: count
       }));
+      
+      // Ordena as datas corretamente
+      dates.sort((a, b) => new Date(b.data_referencia).getTime() - new Date(a.data_referencia).getTime());
 
       setLoadedDates(dates);
     } catch (error: any) {
@@ -65,9 +68,12 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
 
       if (error) throw error;
 
+      // --- CORREÇÃO DE FUSO HORÁRIO APLICADA AQUI TAMBÉM ---
+      const displayDate = new Date(date + 'T00:00:00');
+
       toast({
         title: "Sucesso",
-        description: `Dados de ${format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} removidos`,
+        description: `Dados de ${format(displayDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} removidos`,
       });
 
       await fetchLoadedDates();
@@ -114,31 +120,37 @@ const LoadedDatesManager: React.FC<LoadedDatesManagerProps> = ({ onDatesChanged 
               </CardContent>
             </Card>
           ) : (
-            loadedDates.map((dateInfo) => (
-              <Card key={dateInfo.data_referencia} className="hover:shadow-md transition-all">
-                <CardContent className="pt-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {format(new Date(dateInfo.data_referencia), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                      </p>
-                      <Badge variant="secondary" className="mt-1 text-xs">
-                        {dateInfo.linha_count} linha{dateInfo.linha_count !== 1 ? 's' : ''}
-                      </Badge>
+            loadedDates.map((dateInfo) => {
+              // --- CORREÇÃO DE FUSO HORÁRIO ---
+              // Adicionamos 'T00:00:00' para que a string seja interpretada como data local, não UTC.
+              const localDate = new Date(dateInfo.data_referencia + 'T00:00:00');
+
+              return (
+                <Card key={dateInfo.data_referencia} className="hover:shadow-md transition-all">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {format(localDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                        <Badge variant="secondary" className="mt-1 text-xs">
+                          {dateInfo.linha_count} linha{dateInfo.linha_count !== 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteDate(dateInfo.data_referencia)}
+                        disabled={isLoading}
+                        className="text-destructive hover:bg-destructive/10 shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteDate(dateInfo.data_referencia)}
-                      disabled={isLoading}
-                      className="text-destructive hover:bg-destructive/10 shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       </DialogContent>
