@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(getYesterday());
   const [refreshKey, setRefreshKey] = useState(0);
   
-  const { user, signOut, loading } = useAuth();
+  const { profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleDateChange = (date: Date | undefined) => {
@@ -54,9 +54,9 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = profile?.role === 'admin';
 
-  if (!user) {
+  if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -85,7 +85,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-foreground">{user.username}</p>
+              <p className="text-sm font-medium text-foreground">{profile.username}</p>
               <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>
             <Button
