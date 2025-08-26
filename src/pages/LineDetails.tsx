@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, TrendingUp, AlertTriangle, Activity, Clock, Users, BarChart2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import SpencerLogo from '@/components/SpencerLogo';
-import RealTimeMap from '@/components/RealTimeMap'; // --- IMPORTAÇÃO DO MAPA ---
+import RealTimeMap from '@/components/RealTimeMap';
+import NextDepartures from '@/components/NextDepartures'; // --- IMPORTAÇÃO DO NOVO COMPONENTE ---
 
 // --- Interfaces e Tipos ---
 interface PerformanceData {
@@ -33,7 +32,6 @@ interface PerformanceData {
   ocorrencias_sos: number;
 }
 
-// Componente para a Barra de Progresso
 const ProgressBar: React.FC<{ value: number }> = ({ value }) => (
   <div className="w-full bg-muted rounded-full h-2.5">
     <div 
@@ -43,7 +41,6 @@ const ProgressBar: React.FC<{ value: number }> = ({ value }) => (
   </div>
 );
 
-// Componente para os cartões de estatística do Resumo Geral
 const StatCard: React.FC<{ title: string; value: string; icon: React.ReactNode }> = ({ title, value, icon }) => (
   <Card className="bg-background/50 p-4 flex flex-col items-center justify-center text-center">
     <div className="text-primary mb-2">{icon}</div>
@@ -57,8 +54,6 @@ const LineDetails = () => {
   const { lineCode } = useParams<{ lineCode: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { profile, loading: authLoading } = useAuth();
-  const { toast } = useToast();
   
   const [data, setData] = useState<PerformanceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,7 +97,7 @@ const LineDetails = () => {
     return Math.round((real / prog) * 100);
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -279,7 +274,7 @@ const LineDetails = () => {
               </CardContent>
             </Card>
 
-            {/* --- ADICIONADO: Secção do Mapa em Tempo Real --- */}
+            {/* --- ORDEM ALTERADA --- */}
             <Card className="bg-card shadow-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-foreground">
@@ -289,6 +284,18 @@ const LineDetails = () => {
               </CardHeader>
               <CardContent>
                 {lineCode && <RealTimeMap lineCode={lineCode} />}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Clock className="h-5 w-5 text-primary" />
+                  Próximas Partidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {lineCode && <NextDepartures lineCode={lineCode} />}
               </CardContent>
             </Card>
 
