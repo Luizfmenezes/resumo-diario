@@ -12,10 +12,11 @@ const Auth = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, loading } = useAuth();
+  // --- CORREÇÃO: Usar 'profile' em vez de 'user' ---
+  const { signIn, profile, loading } = useAuth();
 
-  // Redirect if already authenticated
-  if (!loading && user) {
+  // Redireciona se já estiver autenticado
+  if (!loading && profile) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -39,7 +40,6 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-hero p-4">
       <div className="w-full max-w-md space-y-8 animate-fade-in">
-        {/* Logo/Header */}
         <div className="text-center">
           <div className="mx-auto h-20 w-20 mb-4">
             <SpencerLogo className="h-full w-full" />
@@ -48,7 +48,6 @@ const Auth = () => {
           <p className="text-white/80 mt-2">Sistema de Consulta de Desempenho</p>
         </div>
 
-        {/* Auth Form */}
         <Card className="backdrop-blur-sm bg-white/95 shadow-elegant border-0 animate-scale-in">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-zinc-900">Login Spencer Transportes</CardTitle>
@@ -59,7 +58,6 @@ const Auth = () => {
           <CardContent>
             <form onSubmit={handleSignIn} className="space-y-6">
               <div className="space-y-2">
-                {/* CORRIGIDO */}
                 <Label htmlFor="username" className="text-zinc-900">Usuário</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -75,7 +73,6 @@ const Auth = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                {/* CORRIGIDO */}
                 <Label htmlFor="password" className="text-zinc-900">Senha</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

@@ -18,16 +18,13 @@ const busLines = [
   '1026-10', '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'
 ];
 
-// --- CORREÇÃO: Função para obter a data de ontem ---
 const getYesterday = () => {
   const today = new Date();
   today.setDate(today.getDate() - 1);
-  // Remove a parte do tempo para evitar problemas de fuso horário
   return new Date(today.getFullYear(), today.getMonth(), today.getDate());
 };
 
 const Dashboard = () => {
-  // --- CORREÇÃO: Define o estado inicial com a data de ontem ---
   const [selectedDate, setSelectedDate] = useState<Date>(getYesterday());
   const [refreshKey, setRefreshKey] = useState(0);
   
@@ -54,9 +51,10 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
+  // --- CORREÇÃO: Verificar se o 'role' do perfil é 'admin' ---
   const isAdmin = profile?.role === 'admin';
 
-  if (!profile) {
+  if (loading || !profile) { // Adicionado '!profile' para maior segurança
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -67,7 +65,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card/80 backdrop-blur-sm shadow-card border-b border-border animate-fade-in">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -85,6 +82,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
+              {/* --- CORREÇÃO: Exibir o nome de usuário do perfil --- */}
               <p className="text-sm font-medium text-foreground">{profile.username}</p>
               <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>
@@ -102,7 +100,6 @@ const Dashboard = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-4 sm:py-8 space-y-6 sm:space-y-8">
-        {/* Controls Section */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -140,7 +137,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Search Bar */}
         <div className="mb-6">
           <div className="relative max-w-full sm:max-w-md">
             <input
@@ -151,7 +147,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Bus Lines Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {busLines.map((line, index) => (
             <Card
@@ -177,7 +172,6 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Footer Info */}
         <div className="text-center text-muted-foreground text-sm animate-fade-in mt-8">
           <p>
             Sistema desenvolvido para consulta de desempenho operacional

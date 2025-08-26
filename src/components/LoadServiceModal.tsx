@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -27,73 +27,79 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
   const parseServiceText = (text: string) => {
     const lines = text.split('\n');
     const services = [];
-    let currentService: any = {};
+    let currentService: any = null;
 
     for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      if (trimmedLine.includes('🚍 LINHA:')) {
-        if (currentService.codigo_linha) {
-          services.push(currentService);
+        const trimmedLine = line.trim();
+
+        if (trimmedLine.includes('🚍 LINHA:')) {
+            if (currentService) {
+                services.push(currentService);
+            }
+            const match = trimmedLine.match(/LINHA:\s*(.+?)\s*---/);
+            const year = selectedDate.getFullYear();
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            currentService = {
+                codigo_linha: match ? match[1].trim() : '',
+                data_referencia: `${year}-${month}-${day}`,
+                // Inicializa todos os campos numéricos como null
+                icv_tp_prog: null, icv_tp_real: null,
+                icv_ts_prog: null, icv_ts_real: null,
+                perdas_icv: null,
+                icf_prog_pm: null, icf_prog_ep: null, icf_prog_pt: null,
+                icf_real_pm: null, icf_real_ep: null, icf_real_pt: null,
+                ipp_tp: null, ipp_ts: null,
+                ocorrencias_sos: null
+            };
+        } else if (currentService) {
+            if (trimmedLine.includes('- ICV TP:')) {
+                const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
+                if (match) {
+                    currentService.icv_tp_prog = parseInt(match[1]);
+                    currentService.icv_tp_real = parseInt(match[2]);
+                }
+            } else if (trimmedLine.includes('- ICV TS:')) {
+                const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
+                if (match) {
+                    currentService.icv_ts_prog = parseInt(match[1]);
+                    currentService.icv_ts_real = parseInt(match[2]);
+                }
+            } else if (trimmedLine.includes('- Perdas ICV:')) {
+                const match = trimmedLine.match(/Perdas ICV:\s*(\d+)/);
+                if (match) {
+                    currentService.perdas_icv = parseInt(match[1]);
+                }
+            } else if (trimmedLine.includes('- ICF Prog:')) {
+                const match = trimmedLine.match(/PM\((\d+)\),\s*EP\((\d+)\),\s*PT\((\d+)\)/);
+                if (match) {
+                    currentService.icf_prog_pm = parseInt(match[1]);
+                    currentService.icf_prog_ep = parseInt(match[2]);
+                    currentService.icf_prog_pt = parseInt(match[3]);
+                }
+            } else if (trimmedLine.includes('- ICF Real:')) {
+                const match = trimmedLine.match(/PM\((\d+)\),\s*EP\((\d+)\),\s*PT\((\d+)\)/);
+                if (match) {
+                    currentService.icf_real_pm = parseInt(match[1]);
+                    currentService.icf_real_ep = parseInt(match[2]);
+                    currentService.icf_real_pt = parseInt(match[3]);
+                }
+            } else if (trimmedLine.includes('- IPP:')) {
+                const tpMatch = trimmedLine.match(/TP\s*\((\d+)%\)/);
+                const tsMatch = trimmedLine.match(/TS\s*\((\d+)%\)/);
+                if (tpMatch) currentService.ipp_tp = parseInt(tpMatch[1]);
+                if (tsMatch) currentService.ipp_ts = parseInt(tsMatch[1]);
+            } else if (trimmedLine.includes('- S.O.S:')) {
+                const match = trimmedLine.match(/S\.O\.S:\s*(\d+)/);
+                if (match) {
+                    currentService.ocorrencias_sos = parseInt(match[1]);
+                }
+            }
         }
-        const match = trimmedLine.match(/LINHA:\s*(.+?)\s*---/);
-        const year = selectedDate.getFullYear();
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        currentService = {
-          codigo_linha: match ? match[1].trim() : '',
-          data_referencia: `${year}-${month}-${day}`
-        };
-      } else if (trimmedLine.includes('- ICV TP:')) {
-        const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
-        if (match) {
-          currentService.icv_tp_prog = parseInt(match[1]);
-          currentService.icv_tp_real = parseInt(match[2]);
-        }
-      } else if (trimmedLine.includes('- ICV TS:')) {
-        const match = trimmedLine.match(/Prog\s*(\d+),\s*Real\s*(\d+)/);
-        if (match) {
-          currentService.icv_ts_prog = parseInt(match[1]);
-          currentService.icv_ts_real = parseInt(match[2]);
-        }
-      } else if (trimmedLine.includes('- Perdas ICV:')) {
-        const match = trimmedLine.match(/Perdas ICV:\s*(\d+)/);
-        if (match) {
-          currentService.perdas_icv = parseInt(match[1]);
-        }
-      } else if (trimmedLine.includes('- ICF Prog:')) {
-        const match = trimmedLine.match(/PM\((\d+)\),\s*EP\((\d+)\),\s*PT\((\d+)\)/);
-        if (match) {
-          currentService.icf_prog_pm = parseInt(match[1]);
-          currentService.icf_prog_ep = parseInt(match[2]);
-          currentService.icf_prog_pt = parseInt(match[3]);
-        }
-      } else if (trimmedLine.includes('- ICF Real:')) {
-        const match = trimmedLine.match(/PM\((\d+)\),\s*EP\((\d+)\),\s*PT\((\d+)\)/);
-        if (match) {
-          currentService.icf_real_pm = parseInt(match[1]);
-          currentService.icf_real_ep = parseInt(match[2]);
-          currentService.icf_real_pt = parseInt(match[3]);
-        }
-      } else if (trimmedLine.includes('- IPP:')) {
-        const tpMatch = trimmedLine.match(/TP\s*\((\d+)%\)/);
-        const tsMatch = trimmedLine.match(/TS\s*\((\d+)%\)/);
-        if (tpMatch) {
-          currentService.ipp_tp = parseInt(tpMatch[1]);
-        }
-        if (tsMatch) {
-          currentService.ipp_ts = parseInt(tsMatch[1]);
-        }
-      } else if (trimmedLine.includes('- S.O.S:')) {
-        const match = trimmedLine.match(/S\.O\.S:\s*(\d+)/);
-        if (match) {
-          currentService.ocorrencias_sos = parseInt(match[1]);
-        }
-      }
     }
 
-    if (currentService.codigo_linha) {
-      services.push(currentService);
+    if (currentService) {
+        services.push(currentService);
     }
 
     return services;
@@ -112,10 +118,6 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
     setIsLoading(true);
     
     try {
-      // --- CORREÇÃO ---
-      // Lógica antiga de 'set_current_user' e 'localStorage' removida.
-      // O Supabase agora sabe quem é o utilizador através da sessão segura.
-      
       const services = parseServiceText(serviceText);
       
       if (services.length === 0) {
@@ -124,11 +126,10 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
           title: "Erro",
           description: "Não foi possível processar o texto fornecido",
         });
-        setIsLoading(false); // Adicionado para parar o loading em caso de erro de parsing
+        setIsLoading(false);
         return;
       }
 
-      // Apaga os dados existentes para esta data primeiro
       const year = selectedDate.getFullYear();
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const day = String(selectedDate.getDate()).padStart(2, '0');
@@ -139,15 +140,14 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
         .delete()
         .eq('data_referencia', dateString);
 
-      if (deleteError) throw deleteError; // Lança o erro se a exclusão falhar
+      if (deleteError) throw deleteError;
 
-      // Insere os novos dados
       const { error: insertError } = await supabase
         .from('desempenho_linhas')
         .insert(services);
 
       if (insertError) {
-        throw insertError; // Lança o erro se a inserção falhar
+        throw insertError;
       }
 
       toast({
@@ -183,6 +183,9 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
       <DialogContent className="max-w-xs sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle>Carregar Dados do Serviço</DialogTitle>
+          <DialogDescription className="sr-only">
+            Selecione uma data e cole o texto do serviço para carregar os dados de desempenho das linhas.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -210,7 +213,6 @@ const LoadServiceModal: React.FC<LoadServiceModalProps> = ({ onServiceLoaded }) 
                   selected={selectedDate}
                   onSelect={(date) => {
                     if (date) {
-                      // Garante que trabalhamos com a data local, sem conversão de fuso horário
                       const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                       setSelectedDate(localDate);
                     }
