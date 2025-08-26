@@ -136,7 +136,9 @@
 
   .animate-scale-in {
     animation: scale-in 0.4s ease-out;
+
   }
+  
 
   @keyframes fade-in {
     from {
@@ -170,4 +172,25 @@
       transform: scale(1);
     }
   }
+  /* Adicione este bloco no final do seu arquivo src/index.css */
+
+/* Estilos para o ícone customizado do autocarro no mapa */
+.bus-icon .bus-icon-wrapper {
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 2px solid white;
+}
+
+/* Remove a borda padrão que o Leaflet adiciona aos divIcons */
+.bus-icon {
+  background: transparent;
+  border: none;
+}
+
 }

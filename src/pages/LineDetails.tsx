@@ -3,13 +3,14 @@ import { Navigate, useParams, useSearchParams, useNavigate } from 'react-router-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Calendar, TrendingUp, AlertTriangle, Activity, Clock, Users, BarChart2 } from 'lucide-react';
+import { ArrowLeft, MapPin, TrendingUp, AlertTriangle, Activity, Clock, Users, BarChart2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SpencerLogo from '@/components/SpencerLogo';
+import RealTimeMap from '@/components/RealTimeMap'; // --- IMPORTAÇÃO DO MAPA ---
 
 // --- Interfaces e Tipos ---
 interface PerformanceData {
@@ -32,8 +33,6 @@ interface PerformanceData {
   ocorrencias_sos: number;
 }
 
-// --- Componentes Auxiliares para o Novo Design ---
-
 // Componente para a Barra de Progresso
 const ProgressBar: React.FC<{ value: number }> = ({ value }) => (
   <div className="w-full bg-muted rounded-full h-2.5">
@@ -55,10 +54,10 @@ const StatCard: React.FC<{ title: string; value: string; icon: React.ReactNode }
 
 
 const LineDetails = () => {
-  const { lineCode } = useParams();
+  const { lineCode } = useParams<{ lineCode: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   
   const [data, setData] = useState<PerformanceData | null>(null);
@@ -85,7 +84,7 @@ const LineDetails = () => {
         if (!performanceData) {
           setError('Nenhum dado encontrado para esta linha na data selecionada.');
         } else {
-          setData(performanceData);
+          setData(performanceData as PerformanceData);
         }
       } catch (error) {
         console.error('Error fetching line data:', error);
@@ -98,13 +97,11 @@ const LineDetails = () => {
     fetchLineData();
   }, [lineCode, selectedDate]);
 
-  // --- Funções de Cálculo ---
-  const calculatePercentage = (real: number, prog: number): number => {
-    if (prog === 0) return 0;
+  const calculatePercentage = (real: number | null, prog: number | null): number => {
+    if (prog === null || real === null || prog === 0) return 0;
     return Math.round((real / prog) * 100);
   };
 
-  // --- Lógica de Renderização ---
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -115,7 +112,6 @@ const LineDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card/80 backdrop-blur-sm shadow-card border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <Button
@@ -152,7 +148,6 @@ const LineDetails = () => {
         ) : data ? (
           <div className="space-y-6 animate-fade-in">
             
-            {/* Secção ICV */}
             <Card className="bg-card shadow-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-foreground">
@@ -188,7 +183,6 @@ const LineDetails = () => {
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Secção ICF */}
               <Card className="bg-card shadow-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-foreground">
@@ -219,7 +213,6 @@ const LineDetails = () => {
                 </CardContent>
               </Card>
 
-              {/* Secção IPP */}
               <Card className="bg-card shadow-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-foreground">
@@ -240,7 +233,6 @@ const LineDetails = () => {
               </Card>
             </div>
             
-            {/* Secção S.O.S */}
             <Card className="bg-card shadow-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-foreground">
@@ -256,7 +248,6 @@ const LineDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Secção Resumo Geral */}
             <Card className="bg-card shadow-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-foreground">
@@ -272,19 +263,32 @@ const LineDetails = () => {
                 />
                 <StatCard 
                   title="IPP Médio"
-                  value={`${Math.round((data.ipp_tp + data.ipp_ts) / 2)}%`}
+                  value={`${Math.round(((data.ipp_tp || 0) + (data.ipp_ts || 0)) / 2)}%`}
                   icon={<Clock />}
                 />
                 <StatCard 
                   title="Frota Total"
-                  value={data.icf_real_pt.toString()} // Usando ICF Real PT como Frota Total
+                  value={(data.icf_real_pt || 0).toString()}
                   icon={<Users />}
                 />
                 <StatCard 
                   title="Viagens Total"
-                  value={data.icv_tp_real.toString()} // Usando ICV TP Real como Viagens Total
+                  value={(data.icv_tp_real || 0).toString()}
                   icon={<TrendingUp />}
                 />
+              </CardContent>
+            </Card>
+
+            {/* --- ADICIONADO: Secção do Mapa em Tempo Real --- */}
+            <Card className="bg-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Localização em Tempo Real
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {lineCode && <RealTimeMap lineCode={lineCode} />}
               </CardContent>
             </Card>
 

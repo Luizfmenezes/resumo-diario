@@ -8,6 +8,16 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // --- ADICIONADO: Configuração do Proxy ---
+    // Isto resolve o problema de CORS durante o desenvolvimento local.
+    proxy: {
+      // Qualquer requisição para /api será redirecionada para a API da SPTrans
+      '/api': {
+        target: 'http://api.olhovivo.sptrans.com.br/v2.1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api do início da URL
+      },
+    }
   },
   plugins: [
     react(),
