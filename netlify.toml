@@ -1,0 +1,10 @@
+# netlify.toml
+
+# Regra de redirecionamento para atuar como um proxy para a API da SPTrans
+[[redirects]]
+  # Qualquer pedido que comece com /api/...
+  from = "/api/*"
+  # Será redirecionado para a API OlhoVivo. O :splat mantém o resto do caminho.
+  to = "http://api.olhovivo.sptrans.com.br/v2.1/:splat"
+  # O status 200 faz com que funcione como um proxy, mantendo o método (POST, GET, etc.)
+  status = 200
