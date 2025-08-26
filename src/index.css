@@ -1,9 +1,9 @@
+/* --- CORREÇÃO: Mover o @import para o topo --- */
+@import "leaflet/dist/leaflet.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "leaflet/dist/leaflet.css";
-
-
 
 @layer base {
   :root {
@@ -136,9 +136,7 @@
 
   .animate-scale-in {
     animation: scale-in 0.4s ease-out;
-
   }
-  
 
   @keyframes fade-in {
     from {
@@ -172,11 +170,11 @@
       transform: scale(1);
     }
   }
-  /* Adicione este bloco no final do seu arquivo src/index.css */
+}
 
 /* Estilos para o ícone customizado do autocarro no mapa */
 .bus-icon .bus-icon-wrapper {
-  background-color: hsl(var(--primary));
+  /* Estilos base para o círculo */
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -185,6 +183,7 @@
   justify-content: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   border: 2px solid white;
+  /* A cor de fundo será definida pelas classes de direção abaixo */
 }
 
 /* Remove a borda padrão que o Leaflet adiciona aos divIcons */
@@ -193,4 +192,14 @@
   border: none;
 }
 
+/* --- Estilos para as cores dos ícones dos autocarros --- */
+
+/* Sentido 1 (TP) - Verde Claro */
+.bus-icon .bus-icon-wrapper.direction-1 {
+  background-color: #22c55e; /* green-500 */
+}
+
+/* Sentido 2 (TS) - Verde Escuro */
+.bus-icon .bus-icon-wrapper.direction-2 {
+  background-color: #15803d; /* green-700 */
 }

@@ -1,26 +1,27 @@
 // src/services/sptrans.ts
 
-// --- Tipos de Dados da API ---
-
 export interface Vehicle {
-  p: string; // Prefixo do veículo
-  a: boolean; // Acessível para pessoas com deficiência
-  ta: string; // Horário da última atualização
-  py: number; // Latitude
-  px: number; // Longitude
+  p: string; 
+  a: boolean;
+  ta: string;
+  py: number;
+  px: number;
+  sl: number; // --- ADICIONADO: Sentido da linha (1 ou 2) ---
+}
+
+interface LineSearchResult {
+  cl: number; // Código da linha (ID interno)
+  lc: boolean;
+  lt: string;
+  sl: number; // Sentido da linha (1 ou 2)
+  tl: number;
+  tp: string;
+  ts: string;
 }
 
 interface PositionResponse {
   hr: string;
-  l: {
-    c: string;
-    cl: number;
-    sl: number;
-    lt0: string;
-    lt1: string;
-    qv: number;
-    vs: Vehicle[];
-  }[];
+  vs: Omit<Vehicle, 'sl'>[]; // A resposta da API não inclui 'sl', nós adicionamos depois
 }
 
 const SPTRANS_API_TOKEN = 'b2ef23d8961253e24ff6ffd4e6beb4cc75c79a7323f6a3ab1cfa45e42d8d681b';
@@ -70,33 +71,32 @@ class SPTransAPI {
       if (!searchResponse.ok) {
         throw new Error('Falha ao buscar o código da linha.');
       }
-      const linesFound = await searchResponse.json();
+      const linesFound: LineSearchResult[] = await searchResponse.json();
       
-      // --- CORREÇÃO: Verifica se a linha foi encontrada ---
-      // Se não encontrarmos a linha, retornamos um array vazio imediatamente.
       if (!linesFound || linesFound.length === 0) {
         console.warn(`Nenhuma linha encontrada para o código: ${lineCode}`);
         return [];
       }
       
-      const internalLineId = linesFound[0].cl;
+      const positionPromises = linesFound.map(async (line) => {
+        const response = await fetch(`${API_BASE_URL}/Posicao/Linha?codigoLinha=${line.cl}`);
+        if (!response.ok) {
+          console.error(`Erro ao buscar posição para a linha ${line.cl}: ${response.statusText}`);
+          return []; // Retorna array vazio em caso de erro para esta linha
+        }
+        const positionData: PositionResponse = await response.json();
+        // --- ADICIONADO: Adiciona o sentido (sl) a cada veículo ---
+        return positionData.vs.map(vehicle => ({ ...vehicle, sl: line.sl }));
+      });
 
-      // --- CORREÇÃO: Endpoint correto é /Posicao/Linha ---
-      const positionResponse = await fetch(`${API_BASE_URL}/Posicao/Linha?codigoLinha=${internalLineId}`);
-      if (!positionResponse.ok) {
-        throw new Error('Falha ao buscar a posição dos veículos.');
-      }
+      const vehicleArrays = await Promise.all(positionPromises);
 
-      const data: PositionResponse = await positionResponse.json();
-
-      let allVehicles: Vehicle[] = [];
-      if (data.l && data.l.length > 0) {
-        data.l.forEach(lineData => {
-            allVehicles = allVehicles.concat(lineData.vs);
-        });
-      }
+      // Junta os veículos de todos os sentidos num único array
+      const allVehicles = vehicleArrays.flat();
       
-      return allVehicles;
+      const uniqueVehicles = Array.from(new Map(allVehicles.map(v => [v.p, v])).values());
+
+      return uniqueVehicles;
 
     } catch (error) {
       console.error('Erro ao buscar posições dos veículos:', error);
