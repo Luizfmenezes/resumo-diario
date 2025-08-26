@@ -104,6 +104,11 @@
 
   body {
     @apply bg-background text-foreground;
+    /* --- CORREÇÃO: Adiciona espaçamento para a barra de status do telemóvel --- */
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
   }
 }
 
@@ -183,7 +188,6 @@
   justify-content: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   border: 2px solid white;
-  /* A cor de fundo será definida pelas classes de direção abaixo */
 }
 
 /* Remove a borda padrão que o Leaflet adiciona aos divIcons */
