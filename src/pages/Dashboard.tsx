@@ -14,7 +14,7 @@ import LoadedDatesManager from '@/components/LoadedDatesManager';
 import spencerLogoImage from '@/assets/spencer-logo.png';
 
 const busLines = [
-  '1017-10', '1020-10', '1024-10', '1025-10', 
+  '1017-10', '1020-10', '1024-10', '1025-10',
   '1026-10', '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'
 ];
 
@@ -27,9 +27,18 @@ const getYesterday = () => {
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(getYesterday());
   const [refreshKey, setRefreshKey] = useState(0);
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredBusLines, setFilteredBusLines] = useState(busLines);
+
   const { profile, signOut, loading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const results = busLines.filter(line =>
+      line.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredBusLines(results);
+  }, [searchTerm]);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -51,10 +60,9 @@ const Dashboard = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  // --- CORREÇÃO: Verificar se o 'role' do perfil é 'admin' ---
   const isAdmin = profile?.role === 'admin';
 
-  if (loading || !profile) { // Adicionado '!profile' para maior segurança
+  if (loading || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -69,9 +77,9 @@ const Dashboard = () => {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="h-12 w-12">
-              <img 
-                src={spencerLogoImage} 
-                alt="Spencer Transportes" 
+              <img
+                src={spencerLogoImage}
+                alt="Spencer Transportes"
                 className="h-full w-full object-contain"
               />
             </div>
@@ -82,7 +90,6 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              {/* --- CORREÇÃO: Exibir o nome de usuário do perfil --- */}
               <p className="text-sm font-medium text-foreground">{profile.username}</p>
               <p className="text-xs text-muted-foreground">{format(new Date(), "EEEE", { locale: ptBR })}</p>
             </div>
@@ -127,7 +134,7 @@ const Dashboard = () => {
                 </PopoverContent>
               </Popover>
             </div>
-            
+
             {isAdmin && (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <LoadServiceModal onServiceLoaded={handleServiceLoaded} />
@@ -136,19 +143,21 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        
+
         <div className="mb-6">
           <div className="relative max-w-full sm:max-w-md">
             <input
               type="text"
               placeholder="Buscar linhas..."
               className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {busLines.map((line, index) => (
+          {filteredBusLines.map((line, index) => (
             <Card
               key={line}
               className="bg-secondary hover:bg-secondary/90 transition-all duration-200 cursor-pointer animate-scale-in border-0 touch-manipulation"
