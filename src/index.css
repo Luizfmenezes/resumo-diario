@@ -7,14 +7,14 @@
 
 @layer base {
   :root {
-    --background: 215 28% 17%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 100%; /* branco */
+    --foreground: 240 5.9% 10%; /* texto escuro */
 
-    --card: 215 28% 22%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 98%;
+    --card-foreground: 240 5.9% 10%;
 
-    --popover: 215 28% 22%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 240 5.9% 10%;
 
     /* Deep Blue - Primary brand color */
     --primary: 214 84% 56%;
@@ -25,7 +25,7 @@
     --secondary: 142 71% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 215 28% 25%;
+    --muted: 220 13% 91%;
     --muted-foreground: 217.9 10.6% 64.9%;
 
     /* Blue accent */
@@ -35,8 +35,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 28% 30%;
-    --input: 215 28% 30%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 214 84% 56%;
 
     --radius: 0.5rem;
@@ -59,7 +59,7 @@
   }
 
   .dark {
-    --background: 215 28% 12%;
+    --background: 215 28% 12%; /* escuro */
     --foreground: 210 40% 98%;
 
     --card: 215 28% 17%;

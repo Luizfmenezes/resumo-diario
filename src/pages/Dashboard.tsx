@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import LoadServiceModal from '@/components/LoadServiceModal';
 import LoadedDatesManager from '@/components/LoadedDatesManager';
 import spencerLogoImage from '@/assets/spencer-logo.png';
+import ThemeToggle from "@/components/ThemeToggle";
 
 const busLines = [
   '1017-10', '1020-10', '1024-10', '1025-10',
@@ -102,6 +103,7 @@ const Dashboard = () => {
               <LogOut className="h-4 w-4" />
               Sair
             </Button>
+            <ThemeToggle />
           </div>
         </div>
       </header>

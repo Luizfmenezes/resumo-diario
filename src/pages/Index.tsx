@@ -7,14 +7,14 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { profile, loading } = useAuth();
 
   // Auto-redirect authenticated users
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && profile) {
       navigate('/dashboard', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [profile, loading, navigate]);
 
   if (loading) {
     return (

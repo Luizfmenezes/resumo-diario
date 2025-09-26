@@ -9,28 +9,72 @@ import { Bus, Wifi, WifiOff } from 'lucide-react';
 
 // --- CORREÇÃO: Função para criar ícones dinâmicos ---
 // Esta função cria um ícone de autocarro com uma cor específica baseada na direção.
-const createBusIcon = (direction: number) => {
-  // Sentido 1 (TP) -> Verde Claro
-  // Sentido 2 (TS) -> Verde Escuro
-  const directionClass = `direction-${direction}`;
-
+const createBusIcon = (direction: number, prefix: string) => {
+  const circleColor = direction === 1 ? '#43ea7c' : '#1b5c2e';
+  const boxColor = 'rgba(17,17,17,0.85)'; // preto semi-transparente
   return new L.DivIcon({
     html: `
-      <div class="bus-icon-wrapper ${directionClass}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bus">
-          <path d="M8 6v6"/>
-          <path d="M16 6v6"/>
-          <path d="M2 12h19.6"/>
-          <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
-          <circle cx="7" cy="18" r="2"/>
-          <circle cx="17" cy="18" r="2"/>
-        </svg>
+      <div style="display:flex;align-items:center;height:40px;">
+        <div style="
+          background:${circleColor};
+          border:3px solid #fff; /* borda levemente reduzida */
+          border-radius:50%;
+          width:36px;
+          height:36px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          box-shadow:0 2px 6px rgba(0,0,0,.18);
+          position:relative;
+          z-index:2;
+        ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+            viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 6v6"/>
+            <path d="M16 6v6"/>
+            <path d="M2 12h19.6"/>
+            <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+            <circle cx="7" cy="18" r="2"/>
+            <circle cx="17" cy="18" r="2"/>
+          </svg>
+        </div>
+        <div style="
+          background:${boxColor};
+          color:#fff;
+          font-weight:600;
+          font-size:12px;
+          line-height:1;
+          padding:0 10px;
+          height:24px;
+          display:flex;
+          align-items:center;
+          border-radius:6px;
+          margin-left:-10px; /* um pouco mais à direita */
+          position:relative;
+          z-index:1;
+          box-shadow:0 2px 6px rgba(0,0,0,.18);
+        ">
+          <span style="position:relative;z-index:2;">${prefix}</span>
+          <span style="
+            position:absolute;
+            left:-12px;
+            top:50%;
+            transform:translateY(-50%);
+            width:0;
+            height:0;
+            border-top:12px solid transparent;
+            border-bottom:12px solid transparent;
+            border-right:12px solid ${boxColor};
+            z-index:1;
+          "></span>
+        </div>
       </div>
     `,
-    className: 'bus-icon', // Classe base, a cor é definida pela directionClass
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    className: 'bus-icon',
+    iconSize: [80, 20],
+    iconAnchor: [18, 20],
+    popupAnchor: [0, -20],
   });
 };
 
@@ -148,8 +192,11 @@ const RealTimeMap: React.FC<RealTimeMapProps> = ({ lineCode }) => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {vehicles.map(vehicle => (
-            // --- CORREÇÃO: Usa a função para criar o ícone com a cor correta ---
-            <Marker key={vehicle.p} position={[vehicle.py, vehicle.px]} icon={createBusIcon(vehicle.sl)}>
+            <Marker
+              key={vehicle.p}
+              position={[vehicle.py, vehicle.px]}
+              icon={createBusIcon(vehicle.sl, vehicle.p)}
+            >
               <Popup>
                 <b>Autocarro: {vehicle.p}</b><br />
                 Sentido: {vehicle.sl === 1 ? 'Terminal Principal' : 'Terminal Secundário'}<br />
