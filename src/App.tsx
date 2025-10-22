@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import LineDetails from "./pages/LineDetails";
+import RealTimeMapPage from "./pages/RealTimeMapPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,11 @@ const App = () => (
               <Route path="/linha/:lineCode" element={
                 <ProtectedRoute>
                   <LineDetails />
+                </ProtectedRoute>
+              } />
+              <Route path="/mapa" element={
+                <ProtectedRoute>
+                  <RealTimeMapPage />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

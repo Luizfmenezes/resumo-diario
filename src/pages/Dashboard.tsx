@@ -4,7 +4,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, LogOut, Bus } from 'lucide-react';
+import { Calendar as CalendarIcon, LogOut, Bus, Map } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -147,14 +147,24 @@ const Dashboard = () => {
         </div>
 
         <div className="mb-6">
-          <div className="relative max-w-full sm:max-w-md">
-            <input
-              type="text"
-              placeholder="Buscar linhas..."
-              className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="relative flex-1 max-w-full sm:max-w-md">
+              <input
+                type="text"
+                placeholder="Buscar linhas..."
+                className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={() => navigate('/mapa')}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Map className="h-4 w-4" />
+              <span className="hidden sm:inline">Mapa Tempo Real</span>
+              <span className="sm:hidden">Mapa</span>
+            </Button>
           </div>
         </div>
 
