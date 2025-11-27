@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Map, Search, X, Building2, Route, MapPin } from 'lucide-react';
+import { ArrowLeft, Map, Search, X, Building2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import MultiLineRealTimeMap from '@/components/MultiLineRealTimeMap';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -250,8 +250,6 @@ const RealTimeMapPage = () => {
   const [filteredItems, setFilteredItems] = useState<{item: string, type: 'line' | 'prefix'}[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showSpencerD1, setShowSpencerD1] = useState(false);
-  const [showRoutes, setShowRoutes] = useState(true);
-  const [showStops, setShowStops] = useState(false);
   const { profile, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -419,24 +417,6 @@ const RealTimeMapPage = () => {
               <Building2 className="h-3 w-3" />
               <span className="hidden sm:inline">Spencer D1</span>
             </Button>
-            <Button
-              variant={showRoutes ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowRoutes(!showRoutes)}
-              className="flex items-center gap-1 text-xs"
-            >
-              <Route className="h-3 w-3" />
-              <span className="hidden sm:inline">Rotas</span>
-            </Button>
-            <Button
-              variant={showStops ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowStops(!showStops)}
-              className="flex items-center gap-1 text-xs"
-            >
-              <MapPin className="h-3 w-3" />
-              <span className="hidden sm:inline">Paradas</span>
-            </Button>
             <div className="text-right hidden sm:block">
               <p className="text-xs font-medium text-foreground">{profile.username}</p>
             </div>
@@ -487,9 +467,7 @@ const RealTimeMapPage = () => {
       <main className="flex-1 relative">
         <div className="h-full w-full">
           <MultiLineRealTimeMap 
-            lineCodes={selectedItems} 
-            showRoutes={showRoutes}
-            showStops={showStops}
+            lineCodes={selectedItems}
             lineRoutes={lineRoutes}
           />
         </div>
@@ -525,8 +503,6 @@ const RealTimeMapPage = () => {
               )}
               <p className="text-xs text-muted-foreground">
                 Atualização automática a cada 15s
-                {showRoutes && ' • Rotas visíveis'}
-                {showStops && ' • Paradas visíveis'}
               </p>
             </div>
           </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { sptransAPI, Vehicle } from '@/services/sptrans';
-import { Bus, Wifi, WifiOff, Route } from 'lucide-react';
+import { Bus, Wifi, WifiOff } from 'lucide-react';
 
 // Cores para diferentes linhas
 const lineColors = [
@@ -123,15 +123,11 @@ interface RouteData {
 
 interface MultiLineRealTimeMapProps {
   lineCodes: string[];
-  showRoutes?: boolean;
-  showStops?: boolean;
   lineRoutes?: Record<string, RouteData>;
 }
 
 const MultiLineRealTimeMap: React.FC<MultiLineRealTimeMapProps> = ({ 
-  lineCodes, 
-  showRoutes = false,
-  showStops = false,
+  lineCodes,
   lineRoutes = {} 
 }) => {
   const [allVehicles, setAllVehicles] = useState<(Vehicle & { lineCode: string; lineIndex: number; searchType: 'line' | 'prefix' })[]>([]);
@@ -201,33 +197,26 @@ const MultiLineRealTimeMap: React.FC<MultiLineRealTimeMapProps> = ({
           setLoadingProgress(`${lines.length} linha${lines.length !== 1 ? 's' : ''} carregada${lines.length !== 1 ? 's' : ''} ✓`);
         }
 
-        // Para prefixos, usar a função otimizada que agora busca dinamicamente
-        // todas as linhas quando necessário. Limpar termos antes de enviar.
+        // Busca de prefixos limitada às linhas Spencer D1 (comportamento simplificado)
         if (prefixes.length > 0) {
-          const cleaned = prefixes.map(p => String(p).trim()).filter(Boolean);
-          setLoadingProgress(`Localizando ${cleaned.length} prefixo${cleaned.length !== 1 ? 's' : ''}...`);
-          console.log('🎯 Buscando veículos por prefixos de forma otimizada...', cleaned);
-
+          const cleaned = prefixes.map(p => p.trim()).filter(Boolean);
+          setLoadingProgress(`Buscando prefixo${cleaned.length !== 1 ? 's' : ''} (${cleaned.join(', ')}) nas linhas Spencer D1...`);
           try {
             const prefixResults = await sptransAPI.findVehiclesByPrefixes(cleaned);
-
             Object.entries(prefixResults).forEach(([prefix, vehicles], prefixIndex) => {
-              if (vehicles && vehicles.length > 0) {
-                vehicles.forEach(vehicle => {
-                  allVehiclesData.push({
-                    ...vehicle,
-                    lineCode: (vehicle as any).foundInLine || lines[0] || 'unknown',
-                    lineIndex: lines.length + prefixIndex,
-                    searchType: 'prefix' as const
-                  });
+              vehicles.forEach(vehicle => {
+                allVehiclesData.push({
+                  ...vehicle,
+                  lineCode: (vehicle as any).foundInLine,
+                  lineIndex: lines.length + prefixIndex,
+                  searchType: 'prefix' as const
                 });
-              }
+              });
             });
-
-            setLoadingProgress(prev => (prev ? prev + ' ✓' : 'Consulta de prefixos concluída ✓'));
+            setLoadingProgress(prev => prev ? prev + ' • Prefixos verificados ✓' : 'Prefixos verificados ✓');
           } catch (error) {
-            console.error('❌ Erro na busca otimizada de prefixos:', error);
-            setError('Erro ao consultar prefixos. Tente novamente mais tarde.');
+            console.error('Erro ao consultar prefixos:', error);
+            setError('Erro ao consultar prefixos.');
           }
         }
         
@@ -284,66 +273,6 @@ const MultiLineRealTimeMap: React.FC<MultiLineRealTimeMapProps> = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {/* Renderizar rotas das linhas se habilitado */}
-        {showRoutes && Object.entries(lineRoutes).map(([lineCode, route]) => {
-          // Só mostrar rota se a linha estiver selecionada ou se não há linhas selecionadas
-          const shouldShowRoute = lineCodes.length === 0 || lineCodes.includes(lineCode);
-          
-          if (!shouldShowRoute) return null;
-          
-          return (
-            <Polyline
-              key={`route-${lineCode}`}
-              positions={route.coordinates}
-              pathOptions={{
-                color: route.color,
-                weight: 4,
-                opacity: 0.8
-              }}
-            >
-              <Popup>
-                <div className="text-sm">
-                  <p><strong>Linha {lineCode}</strong></p>
-                  <p>{route.name}</p>
-                </div>
-              </Popup>
-            </Polyline>
-          );
-        })}
-
-        {/* Renderizar paradas das linhas se habilitado */}
-        {showStops && Object.entries(lineRoutes).map(([lineCode, route]) => {
-          // Só mostrar paradas se a linha estiver selecionada ou se não há linhas selecionadas
-          const shouldShowStops = lineCodes.length === 0 || lineCodes.includes(lineCode);
-          
-          if (!shouldShowStops || !route.stops) return null;
-          
-          return route.stops.map((stop, index) => (
-            <CircleMarker
-              key={`stop-${lineCode}-${index}`}
-              center={stop.coordinates}
-              pathOptions={{
-                color: route.color,
-                fillColor: route.color,
-                fillOpacity: 0.8,
-                weight: 2
-              }}
-              radius={6}
-            >
-              <Popup>
-                <div className="text-sm">
-                  <p><strong>{stop.name}</strong></p>
-                  <p className="text-muted-foreground">{stop.address}</p>
-                  <p className="text-xs mt-1">
-                    <span className="inline-block w-3 h-0.5 rounded mr-1" style={{ backgroundColor: route.color }}></span>
-                    Linha {lineCode}
-                  </p>
-                </div>
-              </Popup>
-            </CircleMarker>
-          ));
-        })}
-
         {/* Renderizar veículos */}
         {allVehicles.map(vehicle => (
           <Marker
@@ -374,20 +303,10 @@ const MultiLineRealTimeMap: React.FC<MultiLineRealTimeMapProps> = ({
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
             <p className="text-muted-foreground font-medium">
-              {loadingProgress || (lineCodes.some(code => isPrefix(code)) 
-                ? 'A consultar dados de todas as linhas para localizar prefixos...' 
-                : 'A procurar veículos das linhas selecionadas...')}
+              {loadingProgress || (lineCodes.some(code => isPrefix(code))
+                ? 'Localizando prefixos...' 
+                : 'Buscando veículos das linhas selecionadas...')}
             </p>
-            {lineCodes.some(code => isPrefix(code)) && !loadingProgress.includes('✓') && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Consultando {['1017-10', '1020-10', '1024-10', '1025-10', '1026-10', '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'].length} linhas...
-              </p>
-            )}
-            {loadingProgress.includes('✓') && (
-              <p className="text-xs text-green-600 mt-2 font-medium">
-                Processamento concluído!
-              </p>
-            )}
           </div>
         </div>
       )}
@@ -426,35 +345,12 @@ const MultiLineRealTimeMap: React.FC<MultiLineRealTimeMapProps> = ({
                 {prefixes.length > 0 && (
                   <p>🎯 {prefixes.length} prefixo{prefixes.length !== 1 ? 's' : ''} ({prefixVehicles.length} encontrado{prefixVehicles.length !== 1 ? 's' : ''})</p>
                 )}
-                {showRoutes && <p>📍 Rotas visíveis no mapa</p>}
-                {showStops && <p>🚏 Paradas visíveis no mapa</p>}
               </div>
             );
           })()}
         </div>
       )}
 
-      {/* Legenda das rotas quando nenhuma linha está selecionada */}
-      {showRoutes && lineCodes.length === 0 && (
-        <div className="absolute bottom-4 left-4 z-[1000] bg-background/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-border max-w-xs max-h-96 overflow-y-auto">
-          <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1">
-            <Route className="h-3 w-3" />
-            Rotas das Linhas
-          </h3>
-          <div className="space-y-1">
-            {Object.entries(lineRoutes).map(([lineCode, route]) => (
-              <div key={lineCode} className="flex items-center gap-2 text-xs">
-                <div 
-                  className="w-3 h-0.5 rounded" 
-                  style={{ backgroundColor: route.color }}
-                ></div>
-                <span className="font-medium">{lineCode}</span>
-                <span className="text-muted-foreground truncate">{route.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

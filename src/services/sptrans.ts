@@ -125,90 +125,32 @@ class SPTransAPI {
   public async findVehiclesByPrefixes(prefixes: string[], searchInLines?: string[]): Promise<{ [prefix: string]: (Vehicle & { foundInLine: string })[] }> {
     if (!await this.authenticate()) throw new Error('Não autenticado na API da SPTrans.');
 
-    // Se o chamador não informou linhas específicas, buscar dinamicamente
-    // todas as linhas disponíveis na API para garantir cobertura completa
-    let linesToSearch: string[] = [];
-    if (searchInLines && searchInLines.length > 0) {
-      linesToSearch = searchInLines;
-    } else {
-      try {
-        // Buscar todas as linhas (termosBusca vazio tende a retornar todas ou muitas linhas)
-        const resp = await fetch(`${API_BASE_URL}/Linha/Buscar?termosBusca=`);
-        if (!resp.ok) throw new Error('Falha ao listar linhas na API.');
-        const allLines: any[] = await resp.json();
-        // Mapear para os códigos de linha (campo lt ou outro apropriado)
-        linesToSearch = allLines
-          .map(l => l.lt)
-          .filter(Boolean);
-
-        // Fallback para um conjunto conhecido caso a API retorne vazio
-        if (linesToSearch.length === 0) {
-          linesToSearch = [
-            '1017-10', '1020-10', '1024-10', '1025-10', '1026-10', 
-            '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'
-          ];
-        }
-      } catch (error) {
-        console.error('Erro ao obter lista de linhas dinamicamente:', error);
-        linesToSearch = [
-          '1017-10', '1020-10', '1024-10', '1025-10', '1026-10', 
+    // Apenas linhas da empresa (Spencer D1) para simplificar e limitar escopo
+    const linesToSearch = (searchInLines && searchInLines.length > 0)
+      ? searchInLines
+      : [
+          '1017-10', '1020-10', '1024-10', '1025-10', '1026-10',
           '8015-10', '8015-21', '8016-10', '848L-10', '9784-10', 'N137-11'
         ];
-      }
-    }
 
-    console.log(`🔍 Buscando prefixos ${prefixes.join(', ')} nas linhas: ${linesToSearch.join(', ')}`);
+    // Buscar posições das linhas em paralelo (conjunto pequeno)
+    const lineData = await this.getAllBusPositionsFromLines(linesToSearch);
 
-    // Buscar todos os veículos de todas as linhas de forma concorrente em lotes
-    // para evitar sobrecarga de requisições simultâneas.
-    const BATCH_SIZE = 8; // número de linhas por batch
-    const allLineData: { [lineCode: string]: Vehicle[] } = {};
-
-    for (let i = 0; i < linesToSearch.length; i += BATCH_SIZE) {
-      const batch = linesToSearch.slice(i, i + BATCH_SIZE);
-      try {
-        const batchResults = await this.getAllBusPositionsFromLines(batch);
-        Object.assign(allLineData, batchResults);
-      } catch (err) {
-        console.error('Erro ao buscar lote de linhas:', err);
-      }
-    }
-    
     const results: { [prefix: string]: (Vehicle & { foundInLine: string })[] } = {};
-    
-    // Inicializar resultados para cada prefixo
-    prefixes.forEach(prefix => {
-      results[prefix] = [];
-    });
+    prefixes.forEach(p => { results[p] = []; });
 
-    // Para cada linha, verificar se há veículos com os prefixos procurados
-    Object.entries(allLineData).forEach(([lineCode, vehicles]) => {
+    Object.entries(lineData).forEach(([lineCode, vehicles]) => {
       vehicles.forEach(vehicle => {
+        const vp = String(vehicle.p || '').trim();
         prefixes.forEach(prefix => {
-          const vp = String(vehicle.p || '').trim();
           const term = String(prefix).trim();
-
-          // Busca: exata, startsWith e includes (para permitir pesquisas parciais)
-          const prefixMatch = vp === term || vp.startsWith(term) || vp.includes(term);
-
-          if (prefixMatch) {
-            results[term].push({
-              ...vehicle,
-              foundInLine: lineCode
-            });
-            // log útil apenas em modo dev
-            // console.log(`✅ Prefixo ${term} encontrado: veículo ${vp} na linha ${lineCode}`);
+          if (!term) return;
+          // Casos de correspondência simples (exato, begins, contains)
+          if (vp === term || vp.startsWith(term) || vp.includes(term)) {
+            results[term].push({ ...vehicle, foundInLine: lineCode });
           }
         });
       });
-    });
-
-    // Log resumido dos resultados (apenas para dev)
-    prefixes.forEach(prefix => {
-      const count = results[prefix].length;
-      if (count > 0) {
-        console.debug(`🎯 Prefixo ${prefix}: ${count} veículo(s) encontrado(s)`);
-      }
     });
 
     return results;

@@ -25,30 +25,57 @@ const NextDepartures: React.FC<NextDeparturesProps> = ({ lineCode }) => {
     let isMounted = true;
 
     const fetchDepartures = async () => {
-      const predictionData = await sptransAPI.getArrivalPrediction(lineCode);
-      
-      if (!isMounted) return;
+      try {
+        const predictionData = await sptransAPI.getArrivalPrediction(lineCode);
+        if (!isMounted) return;
 
-      if (predictionData) {
-        // As "partidas" do TP são as chegadas previstas no primeiro ponto da rota TS->TP
-        const tsDepartures = predictionData.ts?.ps[0]?.vs.slice(0, 3).map(v => v.t) || [];
-        
-        // As "partidas" do TS são as chegadas previstas no primeiro ponto da rota TP->TS
-        const tpDepartures = predictionData.tp?.ps[0]?.vs.slice(0, 3).map(v => v.t) || [];
+        if (!predictionData) {
+          setError('Não foi possível obter a previsão de partidas.');
+          setDeparturesTP(null);
+          setDeparturesTS(null);
+          setLoading(false);
+          return;
+        }
+
+        // Função auxiliar para extrair próximos horários de um sentido
+        const extractTimes = (resp: ArrivalPredictionResponse | undefined, limit: number): string[] => {
+          if (!resp || !resp.ps || resp.ps.length === 0) return [];
+          // Agregar todos os veículos de todos os pontos
+          const allTimes: string[] = resp.ps.flatMap(p => (p.vs || []).map(v => v.t).filter(Boolean));
+          // Remover duplicados e ordenar
+          const uniqueSorted = Array.from(new Set(allTimes)).sort((a, b) => {
+            // Ordena HH:MM
+            const [ah, am] = a.split(':').map(Number);
+            const [bh, bm] = b.split(':').map(Number);
+            return ah * 60 + am - (bh * 60 + bm);
+          });
+          return uniqueSorted.slice(0, limit);
+        };
+
+        // Partidas dos terminais: considerar primeiros horários de circulação no sentido oposto
+        // Para simplificação: mostramos próximos horários do próprio sentido (não invertendo)
+        const tpDepartures = extractTimes(predictionData.tp, 5);
+        const tsDepartures = extractTimes(predictionData.ts, 5);
 
         setDeparturesTP({
-          terminalName: predictionData.terminalNames.tp,
+          terminalName: predictionData.terminalNames.tp || 'Terminal Principal',
           departures: tpDepartures,
         });
         setDeparturesTS({
-          terminalName: predictionData.terminalNames.ts,
+          terminalName: predictionData.terminalNames.ts || 'Terminal Secundário',
           departures: tsDepartures,
         });
         setError(null);
-      } else {
-        setError('Não foi possível obter a previsão de partidas.');
+      } catch (e) {
+        console.error('Erro ao obter previsões:', e);
+        if (isMounted) {
+          setError('Erro ao carregar previsões.');
+          setDeparturesTP(null);
+          setDeparturesTS(null);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchDepartures();
