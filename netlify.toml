@@ -8,3 +8,9 @@
   to = "http://api.olhovivo.sptrans.com.br/v2.1/:splat"
   # O status 200 faz com que funcione como um proxy, mantendo o método (POST, GET, etc.)
   status = 200
+
+# Redirecionamento SPA: garante que refresh/navegação direta funcionem
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
